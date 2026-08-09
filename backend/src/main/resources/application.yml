@@ -1,0 +1,34 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: forensic-platform-backend
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/forensic_platform}
+    username: ${SPRING_DATASOURCE_USERNAME:forensics}
+    password: ${SPRING_DATASOURCE_PASSWORD:forensics}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+app:
+  security:
+    jwt-secret: ${JWT_SECRET:development-secret-key-change-before-production-which-is-long-enough}
+    jwt-access-expiration-ms: ${JWT_ACCESS_EXPIRATION:900000}
+    jwt-refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION:604800000}
+    account-lock-duration-ms: ${ACCOUNT_LOCK_DURATION:900000}
+    seed-development-users: ${SEED_DEVELOPMENT_USERS:true}
+  cors:
+    allowed-origins: ${FRONTEND_URL:http://localhost:5173,http://localhost:3000}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

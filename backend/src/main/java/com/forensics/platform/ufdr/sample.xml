@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<UFDR>
+
+    <device>
+
+        <manufacturer>Samsung</manufacturer>
+
+        <brand>Samsung</brand>
+
+        <model>Galaxy S24 Ultra</model>
+
+        <imei>123456789012345</imei>
+
+        <operatingSystem>Android</operatingSystem>
+
+    </device>
+
+    <sms>
+
+        <sender>9876543210</sender>
+
+        <receiver>9123456780</receiver>
+
+        <message>Where are you?</message>
+
+        <timestamp>2026-08-01T10:30:00Z</timestamp>
+
+    </sms>
+
+    <sms>
+
+        <sender>9123456780</sender>
+
+        <receiver>9876543210</receiver>
+
+        <message>I am near the station.</message>
+
+        <timestamp>2026-08-01T10:35:00Z</timestamp>
+
+    </sms>
+
+    <contact>
+
+        <name>John Doe</name>
+
+        <phone>9876543210</phone>
+
+    </contact>
+
+    <call>
+
+        <number>9876543210</number>
+
+        <timestamp>2026-08-01T11:00:00Z</timestamp>
+
+    </call>
+
+    <location>
+
+        <latitude>11.0168</latitude>
+
+        <longitude>76.9558</longitude>
+
+        <address>Coimbatore</address>
+
+        <timestamp>2026-08-01T12:00:00Z</timestamp>
+
+    </location>
+
+</UFDR>

@@ -1,0 +1,27 @@
+ALTER TABLE IF EXISTS device
+  ADD COLUMN IF NOT EXISTS brand VARCHAR(120),
+  ADD COLUMN IF NOT EXISTS model VARCHAR(120),
+  ADD COLUMN IF NOT EXISTS imei VARCHAR(40),
+  ADD COLUMN IF NOT EXISTS serial_number VARCHAR(120),
+  ADD COLUMN IF NOT EXISTS operating_system VARCHAR(120),
+  ADD COLUMN IF NOT EXISTS os_version VARCHAR(80),
+  ADD COLUMN IF NOT EXISTS device_type VARCHAR(80),
+  ADD COLUMN IF NOT EXISTS owner_name VARCHAR(160),
+  ADD COLUMN IF NOT EXISTS owner_contact VARCHAR(160),
+  ADD COLUMN IF NOT EXISTS investigator VARCHAR(120),
+  ADD COLUMN IF NOT EXISTS acquisition_method VARCHAR(40) NOT NULL DEFAULT 'LOGICAL_EXTRACTION',
+  ADD COLUMN IF NOT EXISTS seized_date DATE,
+  ADD COLUMN IF NOT EXISTS received_date DATE,
+  ADD COLUMN IF NOT EXISTS notes VARCHAR(4000),
+  ADD COLUMN IF NOT EXISTS created_by VARCHAR(120),
+  ADD COLUMN IF NOT EXISTS updated_by VARCHAR(120),
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+UPDATE device
+SET operating_system = COALESCE(operating_system, platform),
+    updated_at = COALESCE(updated_at, CURRENT_TIMESTAMP);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_device_imei ON device(imei);
+CREATE INDEX IF NOT EXISTS idx_device_status ON device(acquisition_status);
+CREATE INDEX IF NOT EXISTS idx_device_case ON device(investigation_case_id);
+CREATE INDEX IF NOT EXISTS idx_device_manufacturer ON device(manufacturer);
