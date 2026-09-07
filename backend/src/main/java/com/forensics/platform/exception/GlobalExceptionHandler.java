@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import jakarta.persistence.PersistenceException;
 import org.springframework.web.server.ResponseStatusException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -18,6 +20,8 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(BadCredentialsException.class)
     ResponseEntity<Map<String, Object>> badCredentials() {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error(HttpStatus.UNAUTHORIZED, "Invalid username or password"));
@@ -61,12 +65,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({DataAccessException.class, PersistenceException.class})
     ResponseEntity<Map<String, Object>> dataAccess(Exception ex) {
-
+        log.error("Database error while handling request", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Database error", "Unable to load dashboard data"));
     }
 
     @ExceptionHandler(Exception.class)
     ResponseEntity<Map<String, Object>> fallback(Exception ex) {
+        log.error("Unhandled server error while handling request", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error", "An unexpected error occurred"));
     }
 

@@ -26,7 +26,7 @@ export interface AIAnalysisResponse {
 export async function analyzeDevice(
   deviceId: number
 ): Promise<AIAnalysisResponse> {
-  const { data } = await api.get(
+  const { data } = await api.get<AIAnalysisResponse>(
     `/ai/device/${deviceId}/analyze`
   );
 

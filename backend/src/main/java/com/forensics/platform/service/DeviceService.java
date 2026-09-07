@@ -65,14 +65,13 @@ public class DeviceService {
             Authentication authentication
     ) {
 
-        Sort sort = Sort.by(
-                "desc".equalsIgnoreCase(sortDir)
-                        ? Sort.Direction.DESC
-                        : Sort.Direction.ASC,
-                sortBy
-        );
+        Sort sort = sort(sortBy, sortDir);
 
-        Pageable pageable = PageRequest.of(page, size, sort);
+        Pageable pageable = PageRequest.of(
+                Math.max(0, page),
+                Math.min(Math.max(size, 1), 100),
+                sort
+        );
 
         Specification<Device> specification = (root, query, cb) -> {
 
@@ -142,8 +141,33 @@ public class DeviceService {
                 devices.isLast()
         );
     }
+
+    private Sort sort(String sortBy, String sortDir) {
+        String property = switch (sortBy == null ? "updatedAt" : sortBy) {
+            case "deviceName" -> "deviceName";
+            case "manufacturer" -> "manufacturer";
+            case "brand" -> "brand";
+            case "model" -> "model";
+            case "imei" -> "imei";
+            case "operatingSystem" -> "operatingSystem";
+            case "acquisitionStatus" -> "acquisitionStatus";
+            case "investigator" -> "investigator";
+            case "createdAt" -> "createdAt";
+            case "updatedAt" -> "updatedAt";
+            default -> "updatedAt";
+        };
+
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortDir)
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        return Sort.by(direction, property);
+    }
     @Transactional(readOnly = true)
-public DeviceDetailResponse getDevice(Long id, Authentication authentication) {
+public DeviceDetailResponse getDevice(
+        Long id,
+        Authentication authentication
+) {
 
     Device device = deviceRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(
@@ -151,13 +175,21 @@ public DeviceDetailResponse getDevice(Long id, Authentication authentication) {
                     "Device not found"
             ));
 
-    DeviceResponse response = deviceMapper.toResponse(device);
+    DeviceResponse response =
+            deviceMapper.toResponse(device);
 
-    long evidenceCount = evidenceRepository.countByDeviceId(id);
+    long evidenceCount =
+            evidenceRepository.countByDeviceId(id);
 
-    long reportCount = reportRepository.countByInvestigationCaseId(
-            device.getInvestigationCase().getId()
-    );
+    long reportCount = 0;
+
+    if (device.getInvestigationCase() != null) {
+
+        reportCount =
+                reportRepository.countByInvestigationCaseId(
+                        device.getInvestigationCase().getId()
+                );
+    }
 
     long timelineCount = 0;
 
@@ -271,6 +303,7 @@ public void deleteDevice(
                             "Device not found."
                     ));
 
+    evidenceRepository.deleteByDeviceId(id);
     deviceRepository.delete(device);
 
     auditService.record(

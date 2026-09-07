@@ -2,6 +2,7 @@ package com.forensics.platform.ufdr;
 
 import com.forensics.platform.entity.Device;
 import com.forensics.platform.entity.Evidence;
+import com.forensics.platform.service.EvidenceNormalizationService;
 import com.forensics.platform.service.EvidenceImportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class UFDRService {
     private final UFDRParser ufdrParser;
     private final UFDRImportService importService;
     private final EvidenceImportService evidenceImportService;
+    private final EvidenceNormalizationService evidenceNormalizationService;
 
     public Object process(MultipartFile file) throws Exception {
 
@@ -54,6 +56,11 @@ public class UFDRService {
                             device,
                             file.getOriginalFilename()
                     );
+
+            evidenceNormalizationService.normalizeEvidence(
+                    evidence,
+                    "UFDR"
+            );
 
             evidenceCount = evidence.size();
         }

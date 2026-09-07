@@ -4,8 +4,14 @@ const ACCESS_TOKEN_KEY = 'forensic_access_token';
 const REFRESH_TOKEN_KEY = 'forensic_refresh_token';
 const USER_KEY = 'forensic_user';
 
+function normalizeBaseUrl(url: string) {
+  return url.endsWith('/') ? url.slice(0, -1) : url;
+}
+
+const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? '/api/v1',
+  baseURL: normalizeBaseUrl(configuredBaseUrl ?? '/api/v1'),
   headers: {
     'Content-Type': 'application/json'
   }

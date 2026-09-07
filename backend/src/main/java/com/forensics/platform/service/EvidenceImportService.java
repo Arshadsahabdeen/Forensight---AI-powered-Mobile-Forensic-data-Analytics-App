@@ -116,7 +116,7 @@ public class EvidenceImportService {
         );
 
         if (!results.isEmpty()) {
-            evidenceRepository.saveAll(results);
+            results = evidenceRepository.saveAll(results);
         }
 
         return results;

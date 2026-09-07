@@ -61,14 +61,15 @@ public class DeviceMapper {
     }
 
     public DeviceResponse toResponse(Device device) {
+        var investigationCase = device.getInvestigationCase();
 
         return new DeviceResponse(
 
                 device.getId(),
 
-                device.getInvestigationCase().getId(),
+                investigationCase == null ? null : investigationCase.getId(),
 
-                device.getInvestigationCase().getCaseNumber(),
+                investigationCase == null ? null : investigationCase.getCaseNumber(),
 
                 device.getManufacturer(),
 
@@ -113,6 +114,7 @@ public class DeviceMapper {
     }
 
     public DeviceListItem toListItem(Device device) {
+        var investigationCase = device.getInvestigationCase();
 
         return new DeviceListItem(
 
@@ -132,7 +134,7 @@ public class DeviceMapper {
 
                 device.getInvestigator(),
 
-                device.getInvestigationCase().getCaseNumber(),
+                investigationCase == null ? null : investigationCase.getCaseNumber(),
 
                 device.getUpdatedAt()
 

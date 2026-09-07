@@ -1,6 +1,8 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { Upload } from "lucide-react";
+import { uploadUFDR } from "../../services/ufdrService";
 import {
   Search,
   Plus,
@@ -22,6 +24,59 @@ export function DeviceListPage() {
   const navigate = useNavigate();
 
   const queryClient = useQueryClient();
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+const [uploading, setUploading] = useState(false);
+const [uploadError, setUploadError] = useState("");
+
+async function handleUFDRUpload(
+  event: React.ChangeEvent<HTMLInputElement>
+) {
+
+  const file = event.target.files?.[0];
+
+  if (!file) {
+    return;
+  }
+
+  setUploading(true);
+  setUploadError("");
+
+  try {
+
+    const result = await uploadUFDR(file);
+
+    if (!result.deviceId) {
+      throw new Error(
+        "UFDR processed but no device ID was returned."
+      );
+    }
+
+    queryClient.invalidateQueries({
+      queryKey: ["devices"]
+    });
+
+    navigate(`/devices/${result.deviceId}`);
+
+  } catch (error: any) {
+
+    console.error("UFDR upload failed:", error);
+
+    setUploadError(
+      error?.response?.data?.message ??
+      "UFDR upload failed. Please check the backend logs."
+    );
+
+  } finally {
+
+    setUploading(false);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }
+}
 
 const deleteMutation = useMutation({
 
@@ -106,16 +161,12 @@ const deleteMutation = useMutation({
       };
 
     const android = data.items.filter(
+  d => (d.operatingSystem ?? "").toLowerCase().includes("android")
+).length;
 
-      d => d.operatingSystem.toLowerCase().includes("android")
-
-    ).length;
-
-    const ios = data.items.filter(
-
-      d => d.operatingSystem.toLowerCase().includes("ios")
-
-    ).length;
+const ios = data.items.filter(
+  d => (d.operatingSystem ?? "").toLowerCase().includes("ios")
+).length;
 
     const analysis = data.items.filter(
 
@@ -161,145 +212,65 @@ const deleteMutation = useMutation({
 
       <div className="flex items-center justify-between">
 
-        <div>
+  <div>
 
-          <h1 className="text-3xl font-bold text-white">
+    <h1 className="text-3xl font-bold text-white">
+      Device Management
+    </h1>
 
-            Device Management
+    <p className="text-slate-400 mt-1">
+      Manage seized mobile devices and forensic acquisitions.
+    </p>
 
-          </h1>
+  </div>
 
-          <p className="text-slate-400 mt-1">
+  <div className="flex items-center gap-3">
 
-            Manage seized mobile devices and forensic acquisitions.
+    <input
+      ref={fileInputRef}
+      type="file"
+      accept=".ufdr,.zip,.xml"
+      onChange={handleUFDRUpload}
+      className="hidden"
+    />
 
-          </p>
+    <button
+      onClick={() => fileInputRef.current?.click()}
+      disabled={uploading}
+      className="flex items-center gap-2 rounded-lg border border-cyan-600 px-4 py-2 font-medium text-cyan-400 hover:bg-cyan-600/10 disabled:opacity-50"
+    >
 
-        </div>
+      <Upload size={18} />
 
-        <button
+      {uploading
+        ? "Processing..."
+        : "Upload UFDR"}
 
-          onClick={() => navigate("/devices/new")}
+    </button>
 
-          className="flex items-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 font-medium text-white hover:bg-cyan-500"
+    <button
+      onClick={() => navigate("/devices/new")}
+      className="flex items-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 font-medium text-white hover:bg-cyan-500"
+    >
 
-        >
+      <Plus size={18} />
 
-          <Plus size={18} />
+      Add Device
 
-          Add Device
+    </button>
 
-        </button>
+  </div>
 
-      </div>
+</div>
+{uploadError && (
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+  <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
 
-        <Card>
+    {uploadError}
 
-          <div className="flex justify-between">
+  </div>
 
-            <div>
-
-              <p className="text-slate-400">
-
-                Total Devices
-
-              </p>
-
-              <h2 className="text-3xl font-bold text-white mt-2">
-
-                {stats.total}
-
-              </h2>
-
-            </div>
-
-            <Smartphone className="text-cyan-400" />
-
-          </div>
-
-        </Card>
-
-        <Card>
-
-          <div className="flex justify-between">
-
-            <div>
-
-              <p className="text-slate-400">
-
-                Android
-
-              </p>
-
-              <h2 className="text-3xl font-bold text-white mt-2">
-
-                {stats.android}
-
-              </h2>
-
-            </div>
-
-            <Cpu className="text-green-400" />
-
-          </div>
-
-        </Card>
-
-        <Card>
-
-          <div className="flex justify-between">
-
-            <div>
-
-              <p className="text-slate-400">
-
-                iPhone
-
-              </p>
-
-              <h2 className="text-3xl font-bold text-white mt-2">
-
-                {stats.ios}
-
-              </h2>
-
-            </div>
-
-            <Smartphone className="text-blue-400" />
-
-          </div>
-
-        </Card>
-
-        <Card>
-
-          <div className="flex justify-between">
-
-            <div>
-
-              <p className="text-slate-400">
-
-                Under Analysis
-
-              </p>
-
-              <h2 className="text-3xl font-bold text-white mt-2">
-
-                {stats.analysis}
-
-              </h2>
-
-            </div>
-
-            <Shield className="text-orange-400" />
-
-          </div>
-
-        </Card>
-
-      </div>
+)}
 
       <Card>
 

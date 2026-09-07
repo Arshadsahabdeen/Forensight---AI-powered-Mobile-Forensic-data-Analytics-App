@@ -2,15 +2,23 @@ package com.forensics.platform.repository;
 
 import com.forensics.platform.entity.Evidence;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 public interface EvidenceRepository
-        extends JpaRepository<Evidence, Long> {
+        extends JpaRepository<Evidence, Long>, JpaSpecificationExecutor<Evidence> {
+
+    @Override
+    @EntityGraph(attributePaths = {"device", "device.investigationCase"})
+    Page<Evidence> findAll(Specification<Evidence> specification, Pageable pageable);
 
     @EntityGraph(attributePaths = "device")
     List<Evidence> findByDeviceInvestigationCaseId(Long caseId);
@@ -18,6 +26,8 @@ public interface EvidenceRepository
     long countByDeviceId(Long deviceId);
 
     List<Evidence> findByDeviceId(Long deviceId);
+
+    void deleteByDeviceId(Long deviceId);
 
     List<Evidence> findByArtifactTypeIgnoreCase(String artifactType);
 

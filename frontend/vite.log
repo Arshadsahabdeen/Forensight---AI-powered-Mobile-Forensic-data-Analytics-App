@@ -1,12 +1,449 @@
 
 > forensic-platform-frontend@0.1.0 dev
-> vite --host 0.0.0.0 --host 0.0.0.0
+> vite --host 0.0.0.0 --host 127.0.0.1
 
-Port 5173 is in use, trying another one...
-Port 5174 is in use, trying another one...
 
-  [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m595[22m[2m[0m ms[22m
+  VITE v5.4.21  ready in 396 ms
 
-  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5175[22m/[39m
-  [32m➜[39m  [1mNetwork[22m: [36mhttp://172.100.130.185:[1m5175[22m/[39m
-[2m[32m  ➜[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
+  ➜  Local:   http://127.0.0.1:5173/
+  ➜  press h + enter to show help
+3:55:42 pm [vite] hmr update /src/features/evidence/EvidenceListPage.tsx, /src/styles/index.css
+3:59:49 pm [vite] hmr update /src/styles/index.css, /src/features/evidence/EvidenceListPage.tsx, /src/features/evidence/DeviceEvidencePanel.tsx
+4:00:05 pm [vite] hmr update /src/styles/index.css, /src/features/evidence/EvidenceListPage.tsx, /src/features/evidence/DeviceEvidencePanel.tsx
+4:21:51 pm [vite] hmr update /src/styles/index.css, /src/features/reports/ReportsHubPage.tsx, /src/features/reports/ReportPage.tsx
+4:21:51 pm [vite] page reload src/main.tsx
+4:23:11 pm [vite] hmr update /src/styles/index.css, /src/features/reports/ReportsHubPage.tsx, /src/features/reports/ReportPage.tsx
+4:23:11 pm [vite] page reload src/main.tsx
+4:28:12 pm [vite] hmr update /src/features/reports/ReportPage.tsx, /src/styles/index.css
+4:28:13 pm [vite] ✨ new dependencies optimized: @googlemaps/js-api-loader
+4:28:13 pm [vite] ✨ optimized dependencies changed. reloading
+4:29:54 pm [vite] hmr update /src/features/reports/ReportPage.tsx, /src/styles/index.css
+4:29:54 pm [vite] hmr update /src/components/common/GoogleEvidenceMap.tsx, /src/styles/index.css
+4:30:03 pm [vite] hmr update /src/features/reports/ReportPage.tsx, /src/styles/index.css
+4:30:06 pm [vite] hmr update /src/features/reports/ReportPage.tsx, /src/styles/index.css
+4:49:12 pm [vite] hmr update /src/features/reports/ReportPage.tsx, /src/styles/index.css
+4:49:13 pm [vite] hmr update /src/components/common/GoogleEvidenceMap.tsx, /src/styles/index.css
+4:49:14 pm [vite] ✨ new dependencies optimized: react-leaflet, leaflet
+4:49:14 pm [vite] ✨ optimized dependencies changed. reloading
+4:49:19 pm [vite] hmr update /src/features/reports/ReportPage.tsx, /src/styles/index.css
+4:49:19 pm [vite] hmr update /src/components/common/LeafletEvidenceMap.tsx, /src/styles/index.css
+4:54:23 pm [vite] hmr update /src/features/reports/ReportPage.tsx, /src/styles/index.css
+4:55:04 pm [vite] hmr update /src/features/reports/ReportPage.tsx, /src/styles/index.css
+5:00:31 pm [vite] hmr update /src/components/layout/AppLayout.tsx, /src/styles/index.css
+5:00:31 pm [vite] hmr update /src/features/reports/ReportPage.tsx, /src/styles/index.css
+5:02:06 pm [vite] hmr update /src/features/reports/ReportPage.tsx, /src/styles/index.css
+5:02:06 pm [vite] hmr update /src/components/layout/AppLayout.tsx, /src/styles/index.css
+5:10:34 pm [vite] hmr update /src/App.tsx, /src/styles/index.css
+5:11:46 pm [vite] hmr update /src/App.tsx, /src/styles/index.css
+5:11:46 pm [vite] hmr update /src/features/ai/AIAnalysisPage.tsx, /src/styles/index.css
+5:43:21 pm [vite] hmr update /src/App.tsx, /src/styles/index.css
+5:43:22 pm [vite] Pre-transform error: C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\src\features\settings\SettingsPage.tsx: Unexpected token (7:1)
+
+   5 |   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "/api/v1";
+   6 |   return <div className="mx-auto max-w-5xl space-y-5 p-4 md:p-6"><div><p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[.18em] text-cyan-300"><SettingsIcon size={15}/>Platform administration</p><h1 className="mt-2 text-3xl font-bold text-white">Settings</h1><p className="mt-1 text-slate-400">Review safe runtime configuration and platform security posture.</p></div><div className="grid gap-5 md:grid-cols-2"><Card><h2 className="flex items-center gap-2 font-semibold text-white"><Globe2 size={18} className="text-cyan-300"/>API connectivity</h2><div className="mt-4 space-y-3"><Setting label="Frontend API base URL" value={apiBaseUrl}/><Setting label="Environment" value={import.meta.env.MODE}/><Setting label="Map provider" value="OpenStreetMap / Leaflet"/></div></Card><Card><h2 className="flex items-center gap-2 font-semibold text-white"><LockKeyhole size={18} className="text-cyan-300"/>Security controls</h2><div className="mt-4 space-y-3"><Setting label="Authentication" value="JWT access and refresh tokens"/><Setting label="Access control" value="Role-based permissions"/><Setting label="Audit trail" value="Enabled"/></div></Card></div><Card><h2 className="flex items-center gap-2 font-semibold text-white"><Activity size={18} className="text-cyan-300"/>Operational notes</h2><p className="mt-3 text-sm leading-7 text-slate-400">Sensitive secrets such as JWT signing keys and database passwords are intentionally not exposed in the browser. Change those values through the deployment environment and restart the affected service.</p></Card></div>;
+>  7 | +}
+     |  ^
+   8 | +
+   9 | +function Setting({ label, value }: { label: string; value: string }) { return <div className="flex flex-wrap justify-between gap-3 border-b border-slate-800 pb-3 text-sm"><span className="text-slate-500">{label}</span><span className="text-right text-slate-200">{value}</span></div>; }
+  10 |
+5:43:22 pm [vite] Internal server error: C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\src\features\settings\SettingsPage.tsx: Unexpected token (7:1)
+
+   5 |   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "/api/v1";
+   6 |   return <div className="mx-auto max-w-5xl space-y-5 p-4 md:p-6"><div><p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[.18em] text-cyan-300"><SettingsIcon size={15}/>Platform administration</p><h1 className="mt-2 text-3xl font-bold text-white">Settings</h1><p className="mt-1 text-slate-400">Review safe runtime configuration and platform security posture.</p></div><div className="grid gap-5 md:grid-cols-2"><Card><h2 className="flex items-center gap-2 font-semibold text-white"><Globe2 size={18} className="text-cyan-300"/>API connectivity</h2><div className="mt-4 space-y-3"><Setting label="Frontend API base URL" value={apiBaseUrl}/><Setting label="Environment" value={import.meta.env.MODE}/><Setting label="Map provider" value="OpenStreetMap / Leaflet"/></div></Card><Card><h2 className="flex items-center gap-2 font-semibold text-white"><LockKeyhole size={18} className="text-cyan-300"/>Security controls</h2><div className="mt-4 space-y-3"><Setting label="Authentication" value="JWT access and refresh tokens"/><Setting label="Access control" value="Role-based permissions"/><Setting label="Audit trail" value="Enabled"/></div></Card></div><Card><h2 className="flex items-center gap-2 font-semibold text-white"><Activity size={18} className="text-cyan-300"/>Operational notes</h2><p className="mt-3 text-sm leading-7 text-slate-400">Sensitive secrets such as JWT signing keys and database passwords are intentionally not exposed in the browser. Change those values through the deployment environment and restart the affected service.</p></Card></div>;
+>  7 | +}
+     |  ^
+   8 | +
+   9 | +function Setting({ label, value }: { label: string; value: string }) { return <div className="flex flex-wrap justify-between gap-3 border-b border-slate-800 pb-3 text-sm"><span className="text-slate-500">{label}</span><span className="text-right text-slate-200">{value}</span></div>; }
+  10 |
+  Plugin: vite:react-babel
+  File: C:/Users/LENOVO/OneDrive/Desktop/Projects/Final Year Project/forensic-platform/frontend/src/features/settings/SettingsPage.tsx:7:1
+  7  |  +}
+  8  |  +
+  9  |  +function Setting({ label, value }: { label: string; value: string }) { return <div className="flex flex-wrap justify-between gap-3 border-b border-slate-800 pb-3 text-sm"><span className="text-slate-500">{label}</span><span className="text-right text-slate-200">{value}</span></div>; }
+     |    ^
+  10 |  
+      at constructor (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:365:19)
+      at TypeScriptParserMixin.raise (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:6616:19)
+      at TypeScriptParserMixin.unexpected (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:6636:16)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11459:22)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11046:28)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9803:20)
+      at TypeScriptParserMixin.parseExpressionBase (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10801:23)
+      at C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10797:39
+      at TypeScriptParserMixin.allowInAnd (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12438:16)
+      at TypeScriptParserMixin.parseExpression (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10797:17)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12912:23)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12764:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13333:61)
+      at TypeScriptParserMixin.parseBlockBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13326:10)
+      at TypeScriptParserMixin.parseBlock (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13314:10)
+      at TypeScriptParserMixin.parseFunctionBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12117:24)
+      at TypeScriptParserMixin.parseFunctionBodyAndFinish (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12103:10)
+      at TypeScriptParserMixin.parseFunctionBodyAndFinish (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9189:18)
+      at C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13462:12
+      at TypeScriptParserMixin.withSmartMixTopicForbiddingContext (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12420:14)
+      at TypeScriptParserMixin.parseFunction (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13461:10)
+      at TypeScriptParserMixin.parseFunctionStatement (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13142:17)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12808:21)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12764:17)
+      at TypeScriptParserMixin.parseExportDeclaration (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13951:17)
+      at TypeScriptParserMixin.parseExportDeclaration (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9646:85)
+      at TypeScriptParserMixin.maybeParseExportDeclaration (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13910:31)
+      at TypeScriptParserMixin.parseExport (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13829:29)
+      at TypeScriptParserMixin.parseExport (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9402:20)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12895:27)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseModuleItem (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12761:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13333:36)
+      at TypeScriptParserMixin.parseBlockBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13326:10)
+      at TypeScriptParserMixin.parseProgram (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12639:10)
+5:54:55 pm [vite] Internal server error: C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\src\features\settings\SettingsPage.tsx: Unexpected token (7:1)
+
+   5 |   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "/api/v1";
+   6 |   return <div className="mx-auto max-w-5xl space-y-5 p-4 md:p-6"><div><p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[.18em] text-cyan-300"><SettingsIcon size={15}/>Platform administration</p><h1 className="mt-2 text-3xl font-bold text-white">Settings</h1><p className="mt-1 text-slate-400">Review safe runtime configuration and platform security posture.</p></div><div className="grid gap-5 md:grid-cols-2"><Card><h2 className="flex items-center gap-2 font-semibold text-white"><Globe2 size={18} className="text-cyan-300"/>API connectivity</h2><div className="mt-4 space-y-3"><Setting label="Frontend API base URL" value={apiBaseUrl}/><Setting label="Environment" value={import.meta.env.MODE}/><Setting label="Map provider" value="OpenStreetMap / Leaflet"/></div></Card><Card><h2 className="flex items-center gap-2 font-semibold text-white"><LockKeyhole size={18} className="text-cyan-300"/>Security controls</h2><div className="mt-4 space-y-3"><Setting label="Authentication" value="JWT access and refresh tokens"/><Setting label="Access control" value="Role-based permissions"/><Setting label="Audit trail" value="Enabled"/></div></Card></div><Card><h2 className="flex items-center gap-2 font-semibold text-white"><Activity size={18} className="text-cyan-300"/>Operational notes</h2><p className="mt-3 text-sm leading-7 text-slate-400">Sensitive secrets such as JWT signing keys and database passwords are intentionally not exposed in the browser. Change those values through the deployment environment and restart the affected service.</p></Card></div>;
+>  7 | +}
+     |  ^
+   8 | +
+   9 | +function Setting({ label, value }: { label: string; value: string }) { return <div className="flex flex-wrap justify-between gap-3 border-b border-slate-800 pb-3 text-sm"><span className="text-slate-500">{label}</span><span className="text-right text-slate-200">{value}</span></div>; }
+  10 |
+  Plugin: vite:react-babel
+  File: C:/Users/LENOVO/OneDrive/Desktop/Projects/Final Year Project/forensic-platform/frontend/src/features/settings/SettingsPage.tsx:7:1
+  7  |  +}
+  8  |  +
+  9  |  +function Setting({ label, value }: { label: string; value: string }) { return <div className="flex flex-wrap justify-between gap-3 border-b border-slate-800 pb-3 text-sm"><span className="text-slate-500">{label}</span><span className="text-right text-slate-200">{value}</span></div>; }
+     |    ^
+  10 |  
+      at constructor (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:365:19)
+      at TypeScriptParserMixin.raise (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:6616:19)
+      at TypeScriptParserMixin.unexpected (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:6636:16)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11459:22)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11046:28)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9803:20)
+      at TypeScriptParserMixin.parseExpressionBase (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10801:23)
+      at C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10797:39
+      at TypeScriptParserMixin.allowInAnd (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12438:16)
+      at TypeScriptParserMixin.parseExpression (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10797:17)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12912:23)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12764:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13333:61)
+      at TypeScriptParserMixin.parseBlockBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13326:10)
+      at TypeScriptParserMixin.parseBlock (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13314:10)
+      at TypeScriptParserMixin.parseFunctionBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12117:24)
+      at TypeScriptParserMixin.parseFunctionBodyAndFinish (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12103:10)
+      at TypeScriptParserMixin.parseFunctionBodyAndFinish (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9189:18)
+      at C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13462:12
+      at TypeScriptParserMixin.withSmartMixTopicForbiddingContext (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12420:14)
+      at TypeScriptParserMixin.parseFunction (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13461:10)
+      at TypeScriptParserMixin.parseFunctionStatement (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13142:17)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12808:21)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12764:17)
+      at TypeScriptParserMixin.parseExportDeclaration (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13951:17)
+      at TypeScriptParserMixin.parseExportDeclaration (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9646:85)
+      at TypeScriptParserMixin.maybeParseExportDeclaration (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13910:31)
+      at TypeScriptParserMixin.parseExport (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13829:29)
+      at TypeScriptParserMixin.parseExport (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9402:20)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12895:27)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseModuleItem (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12761:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13333:36)
+      at TypeScriptParserMixin.parseBlockBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13326:10)
+      at TypeScriptParserMixin.parseProgram (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12639:10)
+5:54:58 pm [vite] Internal server error: C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\src\features\settings\SettingsPage.tsx: Unexpected token (7:1)
+
+   5 |   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "/api/v1";
+   6 |   return <div className="mx-auto max-w-5xl space-y-5 p-4 md:p-6"><div><p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[.18em] text-cyan-300"><SettingsIcon size={15}/>Platform administration</p><h1 className="mt-2 text-3xl font-bold text-white">Settings</h1><p className="mt-1 text-slate-400">Review safe runtime configuration and platform security posture.</p></div><div className="grid gap-5 md:grid-cols-2"><Card><h2 className="flex items-center gap-2 font-semibold text-white"><Globe2 size={18} className="text-cyan-300"/>API connectivity</h2><div className="mt-4 space-y-3"><Setting label="Frontend API base URL" value={apiBaseUrl}/><Setting label="Environment" value={import.meta.env.MODE}/><Setting label="Map provider" value="OpenStreetMap / Leaflet"/></div></Card><Card><h2 className="flex items-center gap-2 font-semibold text-white"><LockKeyhole size={18} className="text-cyan-300"/>Security controls</h2><div className="mt-4 space-y-3"><Setting label="Authentication" value="JWT access and refresh tokens"/><Setting label="Access control" value="Role-based permissions"/><Setting label="Audit trail" value="Enabled"/></div></Card></div><Card><h2 className="flex items-center gap-2 font-semibold text-white"><Activity size={18} className="text-cyan-300"/>Operational notes</h2><p className="mt-3 text-sm leading-7 text-slate-400">Sensitive secrets such as JWT signing keys and database passwords are intentionally not exposed in the browser. Change those values through the deployment environment and restart the affected service.</p></Card></div>;
+>  7 | +}
+     |  ^
+   8 | +
+   9 | +function Setting({ label, value }: { label: string; value: string }) { return <div className="flex flex-wrap justify-between gap-3 border-b border-slate-800 pb-3 text-sm"><span className="text-slate-500">{label}</span><span className="text-right text-slate-200">{value}</span></div>; }
+  10 |
+  Plugin: vite:react-babel
+  File: C:/Users/LENOVO/OneDrive/Desktop/Projects/Final Year Project/forensic-platform/frontend/src/features/settings/SettingsPage.tsx:7:1
+  7  |  +}
+  8  |  +
+  9  |  +function Setting({ label, value }: { label: string; value: string }) { return <div className="flex flex-wrap justify-between gap-3 border-b border-slate-800 pb-3 text-sm"><span className="text-slate-500">{label}</span><span className="text-right text-slate-200">{value}</span></div>; }
+     |    ^
+  10 |  
+      at constructor (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:365:19)
+      at TypeScriptParserMixin.raise (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:6616:19)
+      at TypeScriptParserMixin.unexpected (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:6636:16)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11459:22)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11046:28)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9803:20)
+      at TypeScriptParserMixin.parseExpressionBase (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10801:23)
+      at C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10797:39
+      at TypeScriptParserMixin.allowInAnd (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12438:16)
+      at TypeScriptParserMixin.parseExpression (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10797:17)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12912:23)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12764:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13333:61)
+      at TypeScriptParserMixin.parseBlockBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13326:10)
+      at TypeScriptParserMixin.parseBlock (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13314:10)
+      at TypeScriptParserMixin.parseFunctionBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12117:24)
+      at TypeScriptParserMixin.parseFunctionBodyAndFinish (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12103:10)
+      at TypeScriptParserMixin.parseFunctionBodyAndFinish (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9189:18)
+      at C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13462:12
+      at TypeScriptParserMixin.withSmartMixTopicForbiddingContext (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12420:14)
+      at TypeScriptParserMixin.parseFunction (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13461:10)
+      at TypeScriptParserMixin.parseFunctionStatement (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13142:17)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12808:21)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12764:17)
+      at TypeScriptParserMixin.parseExportDeclaration (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13951:17)
+      at TypeScriptParserMixin.parseExportDeclaration (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9646:85)
+      at TypeScriptParserMixin.maybeParseExportDeclaration (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13910:31)
+      at TypeScriptParserMixin.parseExport (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13829:29)
+      at TypeScriptParserMixin.parseExport (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9402:20)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12895:27)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseModuleItem (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12761:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13333:36)
+      at TypeScriptParserMixin.parseBlockBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13326:10)
+      at TypeScriptParserMixin.parseProgram (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12639:10)
+5:55:02 pm [vite] hmr update /src/App.tsx, /src/styles/index.css
+5:55:02 pm [vite] hmr update /src/styles/index.css, /src/features/users/UserAdminPage.tsx, /src/features/audit/AuditLogsPage.tsx
+5:55:02 pm [vite] hmr update /src/features/audit/AuditLogsPage.tsx, /src/styles/index.css
+5:55:02 pm [vite] hmr update /src/features/users/UserAdminPage.tsx, /src/styles/index.css
+5:55:02 pm [vite] Pre-transform error: C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\src\features\settings\SettingsPage.tsx: Unexpected token (7:1)
+
+   5 |   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "/api/v1";
+   6 |   return <div className="mx-auto max-w-5xl space-y-5 p-4 md:p-6"><div><p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[.18em] text-cyan-300"><SettingsIcon size={15}/>Platform administration</p><h1 className="mt-2 text-3xl font-bold text-white">Settings</h1><p className="mt-1 text-slate-400">Review safe runtime configuration and platform security posture.</p></div><div className="grid gap-5 md:grid-cols-2"><Card><h2 className="flex items-center gap-2 font-semibold text-white"><Globe2 size={18} className="text-cyan-300"/>API connectivity</h2><div className="mt-4 space-y-3"><Setting label="Frontend API base URL" value={apiBaseUrl}/><Setting label="Environment" value={import.meta.env.MODE}/><Setting label="Map provider" value="OpenStreetMap / Leaflet"/></div></Card><Card><h2 className="flex items-center gap-2 font-semibold text-white"><LockKeyhole size={18} className="text-cyan-300"/>Security controls</h2><div className="mt-4 space-y-3"><Setting label="Authentication" value="JWT access and refresh tokens"/><Setting label="Access control" value="Role-based permissions"/><Setting label="Audit trail" value="Enabled"/></div></Card></div><Card><h2 className="flex items-center gap-2 font-semibold text-white"><Activity size={18} className="text-cyan-300"/>Operational notes</h2><p className="mt-3 text-sm leading-7 text-slate-400">Sensitive secrets such as JWT signing keys and database passwords are intentionally not exposed in the browser. Change those values through the deployment environment and restart the affected service.</p></Card></div>;
+>  7 | +}
+     |  ^
+   8 | +
+   9 | +function Setting({ label, value }: { label: string; value: string }) { return <div className="flex flex-wrap justify-between gap-3 border-b border-slate-800 pb-3 text-sm"><span className="text-slate-500">{label}</span><span className="text-right text-slate-200">{value}</span></div>; }
+  10 |
+5:55:03 pm [vite] Internal server error: C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\src\features\settings\SettingsPage.tsx: Unexpected token (7:1)
+
+   5 |   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "/api/v1";
+   6 |   return <div className="mx-auto max-w-5xl space-y-5 p-4 md:p-6"><div><p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[.18em] text-cyan-300"><SettingsIcon size={15}/>Platform administration</p><h1 className="mt-2 text-3xl font-bold text-white">Settings</h1><p className="mt-1 text-slate-400">Review safe runtime configuration and platform security posture.</p></div><div className="grid gap-5 md:grid-cols-2"><Card><h2 className="flex items-center gap-2 font-semibold text-white"><Globe2 size={18} className="text-cyan-300"/>API connectivity</h2><div className="mt-4 space-y-3"><Setting label="Frontend API base URL" value={apiBaseUrl}/><Setting label="Environment" value={import.meta.env.MODE}/><Setting label="Map provider" value="OpenStreetMap / Leaflet"/></div></Card><Card><h2 className="flex items-center gap-2 font-semibold text-white"><LockKeyhole size={18} className="text-cyan-300"/>Security controls</h2><div className="mt-4 space-y-3"><Setting label="Authentication" value="JWT access and refresh tokens"/><Setting label="Access control" value="Role-based permissions"/><Setting label="Audit trail" value="Enabled"/></div></Card></div><Card><h2 className="flex items-center gap-2 font-semibold text-white"><Activity size={18} className="text-cyan-300"/>Operational notes</h2><p className="mt-3 text-sm leading-7 text-slate-400">Sensitive secrets such as JWT signing keys and database passwords are intentionally not exposed in the browser. Change those values through the deployment environment and restart the affected service.</p></Card></div>;
+>  7 | +}
+     |  ^
+   8 | +
+   9 | +function Setting({ label, value }: { label: string; value: string }) { return <div className="flex flex-wrap justify-between gap-3 border-b border-slate-800 pb-3 text-sm"><span className="text-slate-500">{label}</span><span className="text-right text-slate-200">{value}</span></div>; }
+  10 |
+  Plugin: vite:react-babel
+  File: C:/Users/LENOVO/OneDrive/Desktop/Projects/Final Year Project/forensic-platform/frontend/src/features/settings/SettingsPage.tsx:7:1
+  7  |  +}
+  8  |  +
+  9  |  +function Setting({ label, value }: { label: string; value: string }) { return <div className="flex flex-wrap justify-between gap-3 border-b border-slate-800 pb-3 text-sm"><span className="text-slate-500">{label}</span><span className="text-right text-slate-200">{value}</span></div>; }
+     |    ^
+  10 |  
+      at constructor (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:365:19)
+      at TypeScriptParserMixin.raise (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:6616:19)
+      at TypeScriptParserMixin.unexpected (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:6636:16)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11459:22)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11046:28)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9803:20)
+      at TypeScriptParserMixin.parseExpressionBase (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10801:23)
+      at C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10797:39
+      at TypeScriptParserMixin.allowInAnd (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12438:16)
+      at TypeScriptParserMixin.parseExpression (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10797:17)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12912:23)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12764:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13333:61)
+      at TypeScriptParserMixin.parseBlockBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13326:10)
+      at TypeScriptParserMixin.parseBlock (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13314:10)
+      at TypeScriptParserMixin.parseFunctionBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12117:24)
+      at TypeScriptParserMixin.parseFunctionBodyAndFinish (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12103:10)
+      at TypeScriptParserMixin.parseFunctionBodyAndFinish (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9189:18)
+      at C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13462:12
+      at TypeScriptParserMixin.withSmartMixTopicForbiddingContext (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12420:14)
+      at TypeScriptParserMixin.parseFunction (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13461:10)
+      at TypeScriptParserMixin.parseFunctionStatement (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13142:17)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12808:21)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12764:17)
+      at TypeScriptParserMixin.parseExportDeclaration (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13951:17)
+      at TypeScriptParserMixin.parseExportDeclaration (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9646:85)
+      at TypeScriptParserMixin.maybeParseExportDeclaration (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13910:31)
+      at TypeScriptParserMixin.parseExport (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13829:29)
+      at TypeScriptParserMixin.parseExport (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9402:20)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12895:27)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseModuleItem (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12761:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13333:36)
+      at TypeScriptParserMixin.parseBlockBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13326:10)
+      at TypeScriptParserMixin.parseProgram (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12639:10)
+5:55:06 pm [vite] Internal server error: C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\src\features\settings\SettingsPage.tsx: Unexpected token (7:1)
+
+   5 |   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "/api/v1";
+   6 |   return <div className="mx-auto max-w-5xl space-y-5 p-4 md:p-6"><div><p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[.18em] text-cyan-300"><SettingsIcon size={15}/>Platform administration</p><h1 className="mt-2 text-3xl font-bold text-white">Settings</h1><p className="mt-1 text-slate-400">Review safe runtime configuration and platform security posture.</p></div><div className="grid gap-5 md:grid-cols-2"><Card><h2 className="flex items-center gap-2 font-semibold text-white"><Globe2 size={18} className="text-cyan-300"/>API connectivity</h2><div className="mt-4 space-y-3"><Setting label="Frontend API base URL" value={apiBaseUrl}/><Setting label="Environment" value={import.meta.env.MODE}/><Setting label="Map provider" value="OpenStreetMap / Leaflet"/></div></Card><Card><h2 className="flex items-center gap-2 font-semibold text-white"><LockKeyhole size={18} className="text-cyan-300"/>Security controls</h2><div className="mt-4 space-y-3"><Setting label="Authentication" value="JWT access and refresh tokens"/><Setting label="Access control" value="Role-based permissions"/><Setting label="Audit trail" value="Enabled"/></div></Card></div><Card><h2 className="flex items-center gap-2 font-semibold text-white"><Activity size={18} className="text-cyan-300"/>Operational notes</h2><p className="mt-3 text-sm leading-7 text-slate-400">Sensitive secrets such as JWT signing keys and database passwords are intentionally not exposed in the browser. Change those values through the deployment environment and restart the affected service.</p></Card></div>;
+>  7 | +}
+     |  ^
+   8 | +
+   9 | +function Setting({ label, value }: { label: string; value: string }) { return <div className="flex flex-wrap justify-between gap-3 border-b border-slate-800 pb-3 text-sm"><span className="text-slate-500">{label}</span><span className="text-right text-slate-200">{value}</span></div>; }
+  10 |
+  Plugin: vite:react-babel
+  File: C:/Users/LENOVO/OneDrive/Desktop/Projects/Final Year Project/forensic-platform/frontend/src/features/settings/SettingsPage.tsx:7:1
+  7  |  +}
+  8  |  +
+  9  |  +function Setting({ label, value }: { label: string; value: string }) { return <div className="flex flex-wrap justify-between gap-3 border-b border-slate-800 pb-3 text-sm"><span className="text-slate-500">{label}</span><span className="text-right text-slate-200">{value}</span></div>; }
+     |    ^
+  10 |  
+      at constructor (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:365:19)
+      at TypeScriptParserMixin.raise (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:6616:19)
+      at TypeScriptParserMixin.unexpected (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:6636:16)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11459:22)
+      at TypeScriptParserMixin.parseExprAtom (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:11046:28)
+      at TypeScriptParserMixin.parseMaybeUnary (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9803:20)
+      at TypeScriptParserMixin.parseExpressionBase (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10801:23)
+      at C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10797:39
+      at TypeScriptParserMixin.allowInAnd (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12438:16)
+      at TypeScriptParserMixin.parseExpression (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:10797:17)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12912:23)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12764:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13333:61)
+      at TypeScriptParserMixin.parseBlockBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13326:10)
+      at TypeScriptParserMixin.parseBlock (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13314:10)
+      at TypeScriptParserMixin.parseFunctionBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12117:24)
+      at TypeScriptParserMixin.parseFunctionBodyAndFinish (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12103:10)
+      at TypeScriptParserMixin.parseFunctionBodyAndFinish (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9189:18)
+      at C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13462:12
+      at TypeScriptParserMixin.withSmartMixTopicForbiddingContext (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12420:14)
+      at TypeScriptParserMixin.parseFunction (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13461:10)
+      at TypeScriptParserMixin.parseFunctionStatement (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13142:17)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12808:21)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12764:17)
+      at TypeScriptParserMixin.parseExportDeclaration (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13951:17)
+      at TypeScriptParserMixin.parseExportDeclaration (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9646:85)
+      at TypeScriptParserMixin.maybeParseExportDeclaration (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13910:31)
+      at TypeScriptParserMixin.parseExport (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13829:29)
+      at TypeScriptParserMixin.parseExport (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9402:20)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12895:27)
+      at TypeScriptParserMixin.parseStatementContent (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseModuleItem (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12761:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13333:36)
+      at TypeScriptParserMixin.parseBlockBody (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:13326:10)
+      at TypeScriptParserMixin.parseProgram (C:\Users\LENOVO\OneDrive\Desktop\Projects\Final Year Project\forensic-platform\frontend\node_modules\@babel\parser\lib\index.js:12639:10)
+5:58:15 pm [vite] hmr update /src/styles/index.css, /src/features/users/UserAdminPage.tsx, /src/features/audit/AuditLogsPage.tsx
+6:00:40 pm [vite] hmr update /src/styles/index.css, /src/features/users/UserAdminPage.tsx, /src/features/audit/AuditLogsPage.tsx
+6:05:40 pm [vite] hmr update /src/App.tsx, /src/styles/index.css
+6:06:23 pm [vite] hmr update /src/App.tsx, /src/styles/index.css
+6:14:29 pm [vite] http proxy error: /api/v1/auth/me
+Error: socket hang up
+    at Socket.socketOnEnd (node:_http_client:769:25)
+    at Socket.emit (node:events:521:24)
+    at endReadableNT (node:internal/streams/readable:1736:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+6:14:30 pm [vite] http proxy error: /api/v1/auth/login
+Error: socket hang up
+    at Socket.socketOnEnd (node:_http_client:769:25)
+    at Socket.emit (node:events:521:24)
+    at endReadableNT (node:internal/streams/readable:1736:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+6:14:31 pm [vite] http proxy error: /api/v1/auth/login
+Error: socket hang up
+    at Socket.socketOnEnd (node:_http_client:769:25)
+    at Socket.emit (node:events:521:24)
+    at endReadableNT (node:internal/streams/readable:1736:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+6:14:33 pm [vite] http proxy error: /api/v1/auth/login
+Error: socket hang up
+    at Socket.socketOnEnd (node:_http_client:769:25)
+    at Socket.emit (node:events:521:24)
+    at endReadableNT (node:internal/streams/readable:1736:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+6:14:38 pm [vite] http proxy error: /api/v1/auth/login
+Error: socket hang up
+    at Socket.socketOnEnd (node:_http_client:769:25)
+    at Socket.emit (node:events:521:24)
+    at endReadableNT (node:internal/streams/readable:1736:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+6:14:43 pm [vite] http proxy error: /api/v1/auth/login
+Error: socket hang up
+    at Socket.socketOnEnd (node:_http_client:769:25)
+    at Socket.emit (node:events:521:24)
+    at endReadableNT (node:internal/streams/readable:1736:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+6:14:43 pm [vite] http proxy error: /api/v1/auth/login
+Error: write ECONNABORTED
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writeGeneric (node:internal/stream_base_commons:150:3)
+    at Socket._writeGeneric (node:net:1171:11)
+    at Socket._write (node:net:1183:8)
+    at doWrite (node:internal/streams/writable:596:12)
+    at clearBuffer (node:internal/streams/writable:781:7)
+    at onwrite (node:internal/streams/writable:651:7)
+    at WritableState.onwrite [as callback] (node:internal/streams/writable:350:26)
+    at afterWriteDispatched (node:internal/stream_base_commons:162:9)
+    at writevGeneric (node:internal/stream_base_commons:142:3)
+    at Socket._writeGeneric (node:net:1169:11)
+    at Socket.connect (node:net:1149:12)
+    at Object.onceWrapper (node:events:630:28)
+    at Socket.emit (node:events:521:24)
+    at afterConnect (node:net:1849:10)
+    at afterConnectMultiple (node:net:1956:3)

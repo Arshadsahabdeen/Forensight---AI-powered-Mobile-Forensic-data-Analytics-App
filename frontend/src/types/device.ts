@@ -1,5 +1,6 @@
 export type DeviceStatus =
   | 'SEIZED'
+  | 'ACQUIRED'
   | 'WAITING_FOR_EXTRACTION'
   | 'EXTRACTION_COMPLETED'
   | 'UNDER_ANALYSIS'
@@ -17,43 +18,43 @@ export interface Device {
 
   id: number;
 
-  caseId: number;
+  caseId: number | null;
 
-  caseNumber: string;
+  caseNumber: string | null;
 
-  manufacturer: string;
+  manufacturer: string | null;
 
-  brand: string;
+  brand: string | null;
 
-  model: string;
+  model: string | null;
 
-  deviceName: string;
+  deviceName: string | null;
 
-  imei: string;
+  imei: string | null;
 
-  serialNumber: string;
+  serialNumber: string | null;
 
-  operatingSystem: string;
+  operatingSystem: string | null;
 
-  osVersion: string;
+  osVersion: string | null;
 
-  deviceType: string;
+  deviceType: string | null;
 
-  ownerName: string;
+  ownerName: string | null;
 
-  ownerContact: string;
+  ownerContact: string | null;
 
-  investigator: string;
+  investigator: string | null;
 
   acquisitionMethod: AcquisitionMethod;
 
   acquisitionStatus: DeviceStatus;
 
-  seizedDate: string;
+  seizedDate: string | null;
 
-  receivedDate: string;
+  receivedDate: string | null;
 
-  notes: string;
+  notes: string | null;
 
   createdAt: string;
 
@@ -64,21 +65,21 @@ export interface DeviceListItem {
 
   id: number;
 
-  deviceName: string;
+  deviceName: string | null;
 
-  manufacturer: string;
+  manufacturer: string | null;
 
-  model: string;
+  model: string | null;
 
-  imei: string;
+  imei: string | null;
 
-  operatingSystem: string;
+  operatingSystem: string | null;
 
   acquisitionStatus: DeviceStatus;
 
-  investigator: string;
+  investigator: string | null;
 
-  caseNumber: string;
+  caseNumber: string | null;
 
   updatedAt: string;
 }
