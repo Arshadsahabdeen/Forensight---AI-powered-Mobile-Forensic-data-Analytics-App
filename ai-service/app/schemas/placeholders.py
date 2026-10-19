@@ -1,14 +1,3 @@
-from pydantic import BaseModel, Field
+"""Superseded by app.schemas.assist (kept so older imports keep working)."""
 
-
-class AnalyzeRequest(BaseModel):
-    case_id: str | None = Field(default=None)
-    artifact_type: str | None = Field(default=None)
-    content_ref: str | None = Field(default=None)
-
-
-class PlaceholderResponse(BaseModel):
-    status: str
-    message: str
-    module: str
-    sample: dict
+from app.schemas.assist import AssistRequest, AssistResponse  # noqa: F401

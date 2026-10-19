@@ -14,6 +14,7 @@ import java.io.IOException;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     private final JwtService jwtService;
     private final CustomUserDetailsService userDetailsService;
 
@@ -32,19 +33,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7);
         try {
             String username = jwtService.extractUsername(token);
-            System.out.println("JWT Username = " + username);
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 var details = userDetailsService.loadUserByUsername(username);
-                if (jwtService.isValid(token, details)) {
-                    System.out.println("JWT VALID");
+                // Disabled or locked accounts lose access immediately, not when the token expires.
+                if (details.isEnabled() && details.isAccountNonLocked() && jwtService.isValid(token, details)) {
                     var authentication = new UsernamePasswordAuthenticationToken(details, null, details.getAuthorities());
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }
-        } 
-        catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (Exception ex) {
+            // Invalid, expired or tampered tokens are treated as anonymous; never log token contents.
+            log.debug("Rejected bearer token: {}", ex.getClass().getSimpleName());
             SecurityContextHolder.clearContext();
         }
         filterChain.doFilter(request, response);

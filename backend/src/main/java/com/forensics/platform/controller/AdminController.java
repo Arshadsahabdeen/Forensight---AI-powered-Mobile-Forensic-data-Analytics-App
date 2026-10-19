@@ -4,46 +4,99 @@ import com.forensics.platform.dto.AuthDtos;
 import com.forensics.platform.dto.SettingsDtos;
 import com.forensics.platform.entity.RoleName;
 import com.forensics.platform.entity.User;
-import com.forensics.platform.repository.PlatformSettingRepository;
+import com.forensics.platform.repository.RefreshTokenRepository;
 import com.forensics.platform.repository.RoleRepository;
 import com.forensics.platform.repository.UserRepository;
 import com.forensics.platform.service.AuditService;
+import com.forensics.platform.service.PlatformSettingsService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
 import java.time.Instant;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+/**
+ * Administrator-only account and platform administration. Accounts are never deleted (audit
+ * attribution must remain resolvable); they are disabled instead.
+ */
 @RestController
 @RequestMapping("/api/v1/users")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final AuditService auditService;
-    private final PlatformSettingRepository settingRepository;
+    private final PlatformSettingsService settingsService;
+    private final PasswordEncoder passwordEncoder;
 
-    public AdminController(UserRepository userRepository, RoleRepository roleRepository, AuditService auditService, PlatformSettingRepository settingRepository) {
+    public AdminController(UserRepository userRepository, RoleRepository roleRepository, RefreshTokenRepository refreshTokenRepository,
+                           AuditService auditService, PlatformSettingsService settingsService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
         this.auditService = auditService;
-        this.settingRepository = settingRepository;
+        this.settingsService = settingsService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public List<AuthDtos.AdminUserResponse> users() {
-        return userRepository.findAll().stream().map(this::toResponse).toList();
+        return userRepository.findAll().stream()
+                .sorted(Comparator.comparing(User::getUsername))
+                .map(this::toResponse).toList();
+    }
+
+    @PostMapping
+    @Transactional
+    public ResponseEntity<AuthDtos.AdminUserResponse> create(@Valid @RequestBody AuthDtos.CreateUserRequest request, Authentication authentication,
+                                                             HttpServletRequest httpRequest) {
+        String username = request.username().trim().toLowerCase(Locale.ROOT);
+        String email = request.email().trim().toLowerCase(Locale.ROOT);
+        if (userRepository.findByUsername(username).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username is already in use");
+        }
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email is already in use");
+        }
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setFullName(request.fullName().trim());
+        user.setPassword(passwordEncoder.encode(request.password()));
+        user.setRoles(Set.of(roleRepository.findByName(request.role()).orElseThrow()));
+        user = userRepository.save(user);
+        auditService.record(authentication.getName(), "USER_CREATED", "Created account " + username + " with role " + request.role(), httpRequest, true);
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(user));
+    }
+
+    @PostMapping("/{id}/password")
+    @Transactional
+    public AuthDtos.AdminUserResponse resetPassword(@PathVariable Long id, @Valid @RequestBody AuthDtos.ResetPasswordRequest request,
+                                                    Authentication authentication, HttpServletRequest httpRequest) {
+        User user = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        user.setFailedLoginAttempts(0);
+        user.setAccountLocked(false);
+        user.setLockedUntil(null);
+        user.setUpdatedAt(Instant.now());
+        // Existing sessions end when the password changes.
+        refreshTokenRepository.findByUserIdAndRevokedAtIsNull(user.getId()).forEach(token -> token.setRevokedAt(Instant.now()));
+        auditService.record(authentication.getName(), "USER_PASSWORD_RESET", "Reset password for " + user.getUsername(), httpRequest, true);
+        return toResponse(user);
     }
 
     @PatchMapping("/{id}/status")
@@ -56,10 +109,14 @@ public class AdminController {
         }
         user.setEnabled(request.enabled());
         user.setAccountLocked(request.accountLocked());
-        if (!request.accountLocked()) user.setLockedUntil(null);
+        if (!request.accountLocked()) {
+            user.setLockedUntil(null);
+            user.setFailedLoginAttempts(0);
+        }
         user.setUpdatedAt(Instant.now());
         userRepository.save(user);
-        auditService.record(authentication.getName(), "USER_STATUS_UPDATED", "Updated account status for " + user.getUsername(), httpRequest, true);
+        auditService.record(authentication.getName(), "USER_STATUS_UPDATED", "Updated account status for " + user.getUsername()
+                + " (enabled=" + request.enabled() + ", locked=" + request.accountLocked() + ")", httpRequest, true);
         return ResponseEntity.ok(toResponse(user));
     }
 
@@ -75,7 +132,7 @@ public class AdminController {
         if (user.getRoles().stream().anyMatch(role -> role.getName() == RoleName.ADMIN) && request.role() != RoleName.ADMIN && userRepository.countByRoles_Name(RoleName.ADMIN) <= 1) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", "The platform must retain at least one administrator"));
         }
-        user.setRoles(java.util.Set.of(roleRepository.findByName(request.role()).orElseThrow()));
+        user.setRoles(new java.util.HashSet<>(Set.of(roleRepository.findByName(request.role()).orElseThrow())));
         user.setUpdatedAt(Instant.now());
         userRepository.save(user);
         auditService.record(authentication.getName(), "USER_ROLE_UPDATED", "Changed role for " + user.getUsername() + " to " + request.role(), httpRequest, true);
@@ -84,34 +141,22 @@ public class AdminController {
 
     @GetMapping("/settings")
     public SettingsDtos.PlatformSettingsResponse settings() {
-        return new SettingsDtos.PlatformSettingsResponse(
-                setting("auditRetentionDays", 365), setting("sessionTimeoutMinutes", 30),
-                setting("loginAlertsEnabled", true), setting("maintenanceMode", false), setting("defaultPageSize", 25));
+        return settingsService.get();
     }
 
     @PatchMapping("/settings")
-    @Transactional
-    public ResponseEntity<?> updateSettings(@RequestBody SettingsDtos.PlatformSettingsRequest request, Authentication authentication, HttpServletRequest httpRequest) {
-        if (request.auditRetentionDays() < 30 || request.auditRetentionDays() > 3650 || request.sessionTimeoutMinutes() < 5 || request.sessionTimeoutMinutes() > 1440 || request.defaultPageSize() < 10 || request.defaultPageSize() > 100) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Settings are outside the supported range"));
-        }
-        saveSetting("auditRetentionDays", request.auditRetentionDays());
-        saveSetting("sessionTimeoutMinutes", request.sessionTimeoutMinutes());
-        saveSetting("loginAlertsEnabled", request.loginAlertsEnabled());
-        saveSetting("maintenanceMode", request.maintenanceMode());
-        saveSetting("defaultPageSize", request.defaultPageSize());
-        auditService.record(authentication.getName(), "PLATFORM_SETTINGS_UPDATED", "Updated platform administration settings", httpRequest, true);
-        return ResponseEntity.ok(request);
+    public SettingsDtos.PlatformSettingsResponse updateSettings(@RequestBody SettingsDtos.PlatformSettingsRequest request, Authentication authentication,
+                                                                HttpServletRequest httpRequest) {
+        SettingsDtos.PlatformSettingsResponse updated = settingsService.update(request);
+        auditService.record(authentication.getName(), "PLATFORM_SETTINGS_UPDATED", "Updated platform settings (sessionTimeoutMinutes="
+                + updated.sessionTimeoutMinutes() + ", maintenanceMode=" + updated.maintenanceMode() + ")", httpRequest, true);
+        return updated;
     }
-
-    private int setting(String key, int fallback) { return Integer.parseInt(settingRepository.findBySettingKey(key).map(value -> value.getSettingValue()).orElse(String.valueOf(fallback))); }
-    private boolean setting(String key, boolean fallback) { return Boolean.parseBoolean(settingRepository.findBySettingKey(key).map(value -> value.getSettingValue()).orElse(String.valueOf(fallback))); }
-    private void saveSetting(String key, Object value) { settingRepository.findBySettingKey(key).ifPresentOrElse(setting -> setting.setSettingValue(String.valueOf(value)), () -> settingRepository.save(new com.forensics.platform.entity.PlatformSetting(key, String.valueOf(value)))); }
 
     private AuthDtos.AdminUserResponse toResponse(User user) {
         return new AuthDtos.AdminUserResponse(
                 user.getId(), user.getUsername(), user.getFullName(), user.getEmail(),
-                user.getRoles().stream().map(role -> role.getName()).collect(java.util.stream.Collectors.toSet()),
+                user.getRoles().stream().map(role -> role.getName()).collect(Collectors.toSet()),
                 user.isEnabled(), user.isAccountLocked(), user.getLastLoginAt(), user.getCreatedAt(), user.getUpdatedAt()
         );
     }

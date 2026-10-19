@@ -6,5 +6,7 @@ public enum NormalizedEvidenceCategory {
     CONTACT,
     MEDIA,
     BROWSER,
-    ACCOUNT
+    ACCOUNT,
+    /** Artifact types that do not match a known category (previously these were mislabelled as LOCATION). */
+    OTHER
 }

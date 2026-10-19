@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { User } from '../types/auth';
 import { getCurrentUser, login as loginRequest, logout as logoutRequest } from '../services/authService';
@@ -6,7 +6,6 @@ import { clearStoredAuth, getAccessToken, getRefreshToken, storeTokens } from '.
 
 interface AuthContextValue {
   user: User | null;
-  token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (username: string, password: string) => Promise<void>;
@@ -14,14 +13,28 @@ interface AuthContextValue {
   hasRole: (roles: string[]) => boolean;
 }
 
+const USER_KEY = 'forensic_user';
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [token, setToken] = useState(() => getAccessToken());
-  const [user, setUser] = useState<User | null>(() => {
-    const stored = localStorage.getItem('forensic_user');
+function readStoredUser(): User | null {
+  try {
+    const stored = window.localStorage.getItem(USER_KEY);
     return stored ? (JSON.parse(stored) as User) : null;
-  });
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredUser(user: User) {
+  try {
+    window.localStorage.setItem(USER_KEY, JSON.stringify(user));
+  } catch {
+    // storage unavailable: the session still works for this tab
+  }
+}
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(() => (getAccessToken() ? readStoredUser() : null));
   const [isLoading, setIsLoading] = useState(Boolean(getAccessToken()));
 
   useEffect(() => {
@@ -34,50 +47,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const current = await getCurrentUser();
         if (!active) return;
-        localStorage.setItem('forensic_user', JSON.stringify(current));
+        writeStoredUser(current);
         setUser(current);
-        setToken(getAccessToken());
       } catch {
         clearStoredAuth();
-        if (!active) return;
-        setUser(null);
-        setToken(null);
+        if (active) setUser(null);
       } finally {
         if (active) setIsLoading(false);
       }
     }
-    restore();
+    void restore();
     return () => {
       active = false;
     };
   }, []);
 
-  async function handleLogin(username: string, password: string) {
+  const login = useCallback(async (username: string, password: string) => {
     const response = await loginRequest(username, password);
     storeTokens(response.accessToken, response.refreshToken);
-    localStorage.setItem('forensic_user', JSON.stringify(response.user));
-    setToken(response.accessToken);
+    writeStoredUser(response.user);
     setUser(response.user);
-  }
+  }, []);
 
-  async function handleLogout() {
-    const refreshToken = getRefreshToken();
+  const logout = useCallback(async () => {
     try {
-      await logoutRequest(refreshToken);
+      await logoutRequest(getRefreshToken());
+    } catch {
+      // the server may already consider the session ended; clear locally regardless
     } finally {
       clearStoredAuth();
-      setToken(null);
       setUser(null);
     }
-  }
+  }, []);
 
-  function hasRole(roles: string[]) {
-    return Boolean(user?.roles.some((role) => roles.includes(role)));
-  }
+  const hasRole = useCallback((roles: string[]) => Boolean(user?.roles.some((role) => roles.includes(role))), [user]);
 
   const value = useMemo(
-    () => ({ user, token, isLoading, isAuthenticated: Boolean(token && user), login: handleLogin, logout: handleLogout, hasRole }),
-    [isLoading, token, user]
+    () => ({ user, isLoading, isAuthenticated: Boolean(user && getAccessToken()), login, logout, hasRole }),
+    [user, isLoading, login, logout, hasRole]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -89,4 +96,14 @@ export function useAuth() {
     throw new Error('useAuth must be used within AuthProvider');
   }
   return context;
+}
+
+/** Convenience role checks used to tailor the UI. The backend enforces the same rules. */
+export function usePermissions() {
+  const { hasRole } = useAuth();
+  return {
+    isAdmin: hasRole(['ADMIN']),
+    canWrite: hasRole(['ADMIN', 'INVESTIGATOR']),
+    canReview: hasRole(['ADMIN', 'REVIEWER'])
+  };
 }

@@ -1,165 +1,108 @@
-# ForensicIQ - AI-Powered Mobile Forensic Evidence Intelligence Platform
+# Forensight — Mobile Forensic Evidence Intelligence Platform
 
-Enterprise digital forensic investigation platform with Module 1 authentication and role-based access control integrated across Spring Boot, React, PostgreSQL, and Docker.
+Forensight ingests mobile extraction files, preserves the originals with SHA-256 integrity checks, and turns their records into searchable, correlated, time-ordered evidence. Investigators curate that evidence into reviewed findings and reproducible reports.
 
-## Milestone Scope
+> Correlations and AI-assisted output show how records relate. They do not establish identity, intent or wrongdoing. Hash verification shows that stored files are unchanged since import within this platform; on its own it does not establish legal admissibility.
 
-Implemented:
+## Features
 
-- React 19 + Vite + TypeScript frontend with dark enterprise UI
-- JWT access-token login, refresh-token rotation, logout revocation, protected routes, persistent session, Axios refresh interceptor
-- Spring Boot 3 backend with Spring Security, JWT, JPA, PostgreSQL, Flyway, Swagger
-- Seeded development admin, investigator, reviewer, sample cases, devices, evidence, reports, and audit logs
-- Dashboard backed by `/api/v1/dashboard`
-- Placeholder architecture and APIs for future forensic modules
-- FastAPI AI service placeholder
-- Docker Compose for PostgreSQL, backend, frontend, and AI service
+| Area | What it does |
+|---|---|
+| **Evidence intake** | Upload `.xml`, `.ufdr` or `.zip` files to a case. The file type is checked from its content, not just its extension. SHA-256 is computed while streaming to read-only, content-addressed storage. Identical re-uploads are rejected. XML is parsed with XXE protection. Archives are read without extracting to disk, with size and entry limits. |
+| **Processing monitor** | Imports run as background jobs with progress, a log and retry. Each import is a single all-or-nothing transaction, and duplicate records are skipped per device. Jobs interrupted by a server restart are marked for retry. |
+| **Integrity & chain of custody** | Re-verify any file's hash on demand. Every receive, import, verify, download, view and export is written to an **append-only** audit log (a PostgreSQL trigger blocks UPDATE and DELETE). Each audit row is **SHA-256 hash-chained** to the previous one, and admins can verify the chain. |
+| **Provenance** | Every record keeps its source file, its XPath-like location in that file, a record hash, the original timestamp text and the declared timezone. Normalized (derived) data is stored separately from the original record. |
+| **Timeline** | UTC-ordered and filterable by device, type, entity and time range. Shows how each timestamp was derived (`EXACT`, `ASSUMED_UTC`, `DATE_ONLY`, `UNPARSEABLE`, `MISSING`). Flags future, post-seizure and implausible times, and the same message appearing on two devices with matching or conflicting times. Undated records are listed, not dropped. |
+| **Correlation engine** | Deterministic, documented rules: communication records, address-book entries, identifiers seen on each device, identifiers shared between devices, the same communication captured on two devices, and time proximity to location records. Every relationship states its rule, whether it is **stated by records** or **inferred**, an explanation, and its supporting record IDs. Phone numbers are matched on their last 10 digits, and such merges are disclosed. |
+| **Relationship explorer** | Interactive graph of people, numbers, accounts, locations, devices and, optionally, individual events. Supports search, type and basis filters, zoom, pan, focus with step-wise expansion, a detail panel with supporting records, and a list view. |
+| **Evidence assistant** | Search, question answering, summaries and entity extraction for one case. The backend sends only that case's records to the AI service, then removes anything citing records it didn't send. By default the AI service runs a local **extractive** engine (BM25 retrieval, counting, pattern extraction), so no evidence leaves the platform. Generative analysis with Claude is **opt-in**. If the AI service is down, a clearly labelled keyword fallback is returned. |
+| **Workspace** | Bookmarks, notes and findings. Each finding states its basis (verified fact, inference or AI-suggested) and links supporting records. Findings go through a review workflow, and authors cannot review their own work. A chronological narrative is built from the findings. |
+| **Reports** | Built from a stored JSON snapshot plus its SHA-256, so they can be reproduced and checked for alteration. Sections cover case details, devices, evidence sources with hashes, an overview, findings (with AI content marked), key events, methodology, data-driven limitations and the audit trail. PDF export is rendered from the snapshot. |
+| **Security** | JWT access tokens and rotating refresh tokens. Server-side role and case-assignment checks on every endpoint. Idle-session timeout is enforced by both browser and server. Maintenance mode is enforced. Accounts are disabled rather than deleted. Cases or devices holding evidence cannot be deleted. Errors never expose stack traces, SQL, tokens or evidence content. |
 
-Not implemented yet by design:
+## Architecture
 
-- Full case management
-- Device acquisition workflows
-- Evidence processing
-- Timeline reconstruction
-- Report generation
-- AI analysis logic
+```
+frontend (React 19, Vite, TypeScript, Tailwind)  ──/api──▶  backend (Spring Boot 3.3, Java 21)  ──▶ PostgreSQL 16
+                                                                 │  evidence files (read-only volume)
+                                                                 └─▶ ai-service (FastAPI) ──(opt-in)──▶ Claude API
+```
 
-## Default Credentials
+* Backend packages: `controller`, `service` (case access, ingestion, correlation, timeline, workspace, reports, assistant, audit), `ufdr` (secure parsing and extraction), `entity` and `repository` (JPA), with Flyway migrations `V1`–`V11`.
+* AI service: `/health`, `/v1/config`, `/v1/assist`, with an extractive engine, an optional Claude engine (`claude-opus-5-5` by default, structured JSON output, refusal fallback) and grounding validation.
 
-- Username: `admin`
-- Email: `admin@forensics.local`
-- Password: `Admin@123`
+See [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md) for endpoints and [datasets/samples/README.md](datasets/samples/README.md) for the supported XML schema and synthetic sample files.
 
-Sample investigator:
-
-- Username: `investigator`
-- Email: `investigator@forensics.local`
-- Password: `Investigator@123`
-
-Sample reviewer:
-
-- Username: `reviewer`
-- Email: `reviewer@forensics.local`
-- Password: `Reviewer@123`
-
-These accounts are development-only. Set `SEED_DEVELOPMENT_USERS=false` outside development and change passwords through a future administrative workflow or direct controlled database maintenance.
-
-## Authentication Architecture
-
-The frontend signs in at `POST /api/v1/auth/login` with a username or email and password. The backend validates BCrypt password hashes, tracks failed attempts, locks accounts after five failures for `ACCOUNT_LOCK_DURATION`, records audit events, and returns a short-lived JWT access token plus an opaque refresh token.
-
-Access tokens are bearer tokens sent as `Authorization: Bearer <token>`. They use `JWT_ACCESS_EXPIRATION` in milliseconds, defaulting to `900000` (15 minutes). Refresh tokens are stored server-side only as SHA-256 hashes, use `JWT_REFRESH_EXPIRATION` in milliseconds, defaulting to `604800000` (7 days), and are rotated on every refresh.
-
-Roles:
-
-- `ADMIN`: dashboard, user management, audit logs, settings, and all current/future modules.
-- `INVESTIGATOR`: dashboard and investigation modules, excluding admin-only user management/settings/audit administration.
-- `REVIEWER`: dashboard and permitted review-oriented investigation views.
-
-Frontend role checks hide navigation and redirect to `/unauthorized`; backend Spring Security remains the security boundary. `/api/v1/users/**` and `/api/v1/admin/**` require `ADMIN`.
-
-## Authentication APIs
-
-- `POST /api/v1/auth/login`
-- `POST /api/v1/auth/refresh`
-- `POST /api/v1/auth/logout`
-- `GET /api/v1/auth/me`
-
-Error responses are JSON and avoid stack traces, SQL details, passwords, token secrets, and complete token values.
-
-## Run With Docker
+## Run with Docker
 
 ```bash
+cp .env.example .env        # optional; set JWT_SECRET and passwords for anything beyond local use
 docker compose up --build
 ```
 
-Services:
+| Service | URL |
+|---|---|
+| Web app | http://localhost:3000 |
+| Backend API / Swagger | http://localhost:8080 · http://localhost:8080/swagger-ui.html |
+| AI service | http://localhost:8000/health |
 
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:8080
-- Swagger UI: http://localhost:8080/swagger-ui.html
-- AI Service: http://localhost:8000
-- AI Health: http://localhost:8000/health
+Original evidence files persist in the `evidence-data` volume and the database in `postgres-data`. Back up both together.
 
-Docker uses the PostgreSQL service hostname `postgres` for backend database access. The frontend container serves `/api/**` through Nginx to the backend service.
+## Local development
 
-## Local Development
-
-Frontend:
+Requirements: JDK 21+ (tested with 21 in Docker and 25 locally), Maven 3.9, Node 20+, Python 3.12+.
 
 ```bash
-cd frontend
-npm install
-npm run build
-npm run dev
+# Backend — needs PostgreSQL on localhost:5432 (database/user/password: forensic_platform/forensics/forensics)
+cd backend && mvn spring-boot:run
+
+# Backend without Docker or a local PostgreSQL (embedded PostgreSQL 16, data in backend/target/dev-postgres)
+cd backend && mvn test-compile org.codehaus.mojo:exec-maven-plugin:3.5.0:java \
+  -Dexec.mainClass=com.forensics.platform.dev.LocalDevServer -Dexec.classpathScope=test
+
+# AI service
+cd ai-service && python -m venv .venv && .venv/Scripts/activate   # source .venv/bin/activate on macOS/Linux
+pip install -r requirements-dev.txt && uvicorn app.main:app --port 8000
+
+# Frontend (proxies /api to localhost:8080)
+cd frontend && npm install && npm run dev        # http://localhost:5173
 ```
 
-Backend:
+Development accounts (created only when missing, and only with `SEED_DEVELOPMENT_USERS=true`): `admin / Admin@123`, `investigator / Investigator@123` (Aarav Sharma, leads the first three demo cases), `reviewer / Reviewer@123`, and `inv01`–`inv05 / Investigator@123`. Demo cases are labelled synthetic and contain no evidence. Import the files in `datasets/samples` to create real records.
+
+### Enabling generative AI (optional)
+
+Set both variables on the AI service and restart it. Only do this where policy allows evidence to be sent to the model provider.
+
+```
+ANTHROPIC_API_KEY=...            # never commit
+AI_ALLOW_EXTERNAL_PROCESSING=true
+AI_MODEL=claude-opus-5-5         # optional
+```
+
+Without both, the local extractive engine is used and the UI says so.
+
+## Tests
 
 ```bash
-cd backend
-mvn test
-mvn spring-boot:run
+cd backend && mvn test           # unit, MockMvc + H2 integration, and PostgreSQL 16 (embedded) migration tests
+cd ai-service && python -m pytest
+cd frontend && npm test && npm run build
+docker compose config -q         # compose validation
 ```
 
-AI Service:
+## Database migrations
 
-```bash
-cd ai-service
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-```
+* `V10` adds evidence provenance columns, source files, processing jobs and logs, workspace tables, report snapshot columns, audit chain columns, and the append-only audit trigger.
+* `V11` makes IMEI unique per case instead of globally.
+* All statements are idempotent. Existing rows are preserved: older records get `timestamp_status = LEGACY_IMPORT` (or `MISSING`), and pre-chain audit rows are reported as legacy and unverifiable.
+* **If your database already ran `V5` or `V9` before their recent edits** (columns added so fresh databases migrate cleanly), Flyway reports a checksum mismatch at startup. Run `flyway repair` once, or start once with `SPRING_FLYWAY_VALIDATE_ON_MIGRATE=false`, then remove the flag.
 
-PostgreSQL defaults:
+## Known limitations
 
-- Database: `forensic_platform`
-- User: `forensics`
-- Password: `forensics`
-
-Copy `.env.example` to `.env` for local overrides. Do not commit real `.env` files or production secrets.
-
-## Repository Structure
-
-```text
-forensic-platform/
-├── frontend/
-├── backend/
-├── ai-service/
-├── datasets/
-├── docs/
-├── docker/
-├── docker-compose.yml
-└── README.md
-```
-
-## Testing
-
-Backend tests cover login success, invalid credentials, disabled accounts, account lockout, and refresh-token revocation behavior. Run from `backend/`:
-
-```bash
-mvn test
-mvn package
-```
-
-Frontend verification:
-
-```bash
-cd frontend
-npm run build
-```
-
-This project currently has no frontend test runner configured, so no new frontend test framework was introduced.
-
-## Troubleshooting
-
-- 401 on protected pages: confirm the access token exists and `GET /api/v1/auth/me` succeeds.
-- Refresh loops: clear browser storage for the app and sign in again.
-- CORS errors: set `FRONTEND_URL` to the exact frontend origin.
-- Database startup errors: ensure PostgreSQL is healthy and Flyway migrations have completed.
-- Docker frontend API errors: use the container frontend at `http://localhost:3000`, which proxies `/api` to the backend.
-
-## Security Notes
-
-The platform uses JWT authentication with BCrypt password encoding, hashed refresh tokens, account lockout, audit logging, and role-based authorities. Browser storage is used for tokens in the current architecture; this keeps the implementation simple and centralized, but production should prefer secure, HttpOnly, SameSite cookies with HTTPS. Replace `JWT_SECRET` before production, enforce HTTPS, tighten CORS, and keep future schema changes in Flyway migrations.
+* Only the documented XML schema is decoded. Vendor-specific report formats (e.g. Cellebrite model/field XML) inside UFDR archives are not interpreted natively.
+* Evidence and correlation analysis load a case's records into memory, which suits cases up to tens of thousands of records. Larger datasets would need streaming or database-side aggregation.
+* The audit hash chain detects edits, deletions and reordering of chained rows, but not removal of the most recent rows (tail truncation) or changes by a database superuser who also recomputes the chain. Audit writes are serialized within one backend instance; multi-instance deployments would need a database-level lock.
+* Tokens are stored in browser localStorage (existing design). Production deployments should use HTTPS, and ideally HttpOnly cookies.
+* The PDF uses the standard PDF fonts, so characters outside Latin-1 render as `?`.
+* Generative AI has been tested with a mocked client only; no live model call was made during development.

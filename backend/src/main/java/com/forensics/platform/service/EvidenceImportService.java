@@ -2,418 +2,132 @@ package com.forensics.platform.service;
 
 import com.forensics.platform.entity.Device;
 import com.forensics.platform.entity.Evidence;
+import com.forensics.platform.entity.EvidenceSourceFile;
+import com.forensics.platform.entity.TimestampStatus;
 import com.forensics.platform.repository.EvidenceRepository;
+import com.forensics.platform.repository.EvidenceSourceFileRepository;
+import com.forensics.platform.ufdr.EvidenceExtractor.ExtractedRecord;
+import com.forensics.platform.ufdr.EvidenceExtractor.ExtractionResult;
+import com.forensics.platform.ufdr.UFDRImportService;
 import org.springframework.stereotype.Service;
-import org.w3c.dom.*;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.time.format.DateTimeParseException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.HexFormat;
 import java.util.List;
+import java.util.Set;
 
+/**
+ * Persists extracted records for one evidence file in a single transaction (all-or-nothing),
+ * so a failed import never leaves partial evidence behind and can be retried safely.
+ */
 @Service
 public class EvidenceImportService {
 
+    private static final Set<TimestampStatus> TIMESTAMP_ISSUES =
+            EnumSet.of(TimestampStatus.MISSING, TimestampStatus.UNPARSEABLE, TimestampStatus.ASSUMED_UTC, TimestampStatus.DATE_ONLY);
+
     private final EvidenceRepository evidenceRepository;
+    private final EvidenceSourceFileRepository fileRepository;
+    private final UFDRImportService deviceResolver;
+    private final EvidenceNormalizationService normalizationService;
 
-    public EvidenceImportService(
-            EvidenceRepository evidenceRepository
-    ) {
+    public EvidenceImportService(EvidenceRepository evidenceRepository, EvidenceSourceFileRepository fileRepository,
+                                 UFDRImportService deviceResolver, EvidenceNormalizationService normalizationService) {
         this.evidenceRepository = evidenceRepository;
+        this.fileRepository = fileRepository;
+        this.deviceResolver = deviceResolver;
+        this.normalizationService = normalizationService;
     }
 
-    public List<Evidence> extractAndSave(
-            Document document,
-            Device device,
-            String fileName
-    ) {
+    public record ImportOutcome(Long deviceId, String deviceName, boolean deviceCreated, int recordsCreated,
+                                int duplicatesSkipped, int timestampIssues) {}
 
-        List<Evidence> results = new ArrayList<>();
+    @Transactional
+    public ImportOutcome persist(Long fileId, ExtractionResult extraction, String actor) {
+        EvidenceSourceFile file = fileRepository.findWithCaseById(fileId)
+                .orElseThrow(() -> new IllegalStateException("Evidence file " + fileId + " not found"));
 
-        if (document == null) {
-            return results;
-        }
+        UFDRImportService.Resolution resolution = deviceResolver.resolve(file, extraction.device(), actor);
+        Device device = resolution.device();
+        file.setDevice(device);
 
-        extract(
-                document,
-                "sms",
-                "SMS",
-                device,
-                fileName,
-                results
-        );
+        Set<String> existingHashes = new HashSet<>(evidenceRepository.findRecordHashesForDevice(device.getId()));
+        List<Evidence> toSave = new ArrayList<>();
+        int duplicates = 0;
+        int timestampIssues = 0;
 
-        extract(
-                document,
-                "message",
-                "SMS",
-                device,
-                fileName,
-                results
-        );
-
-        extract(
-                document,
-                "call",
-                "CALL",
-                device,
-                fileName,
-                results
-        );
-
-        extract(
-                document,
-                "contact",
-                "CONTACT",
-                device,
-                fileName,
-                results
-        );
-
-        extract(
-                document,
-                "location",
-                "LOCATION",
-                device,
-                fileName,
-                results
-        );
-
-        extract(
-                document,
-                "photo",
-                "PHOTO",
-                device,
-                fileName,
-                results
-        );
-
-        extract(
-                document,
-                "video",
-                "VIDEO",
-                device,
-                fileName,
-                results
-        );
-
-        extract(
-                document,
-                "browser",
-                "BROWSER",
-                device,
-                fileName,
-                results
-        );
-
-        extract(
-                document,
-                "browserHistory",
-                "BROWSER_HISTORY",
-                device,
-                fileName,
-                results
-        );
-
-        if (!results.isEmpty()) {
-            results = evidenceRepository.saveAll(results);
-        }
-
-        return results;
-    }
-
-    private void extract(
-            Document document,
-            String tagName,
-            String artifactType,
-            Device device,
-            String fileName,
-            List<Evidence> output
-    ) {
-
-        NodeList nodes =
-                document.getElementsByTagName(tagName);
-
-        for (int i = 0; i < nodes.getLength(); i++) {
-
-            Node node = nodes.item(i);
-
-            if (node.getNodeType() != Node.ELEMENT_NODE) {
+        for (ExtractedRecord record : extraction.records()) {
+            String recordHash = recordHash(record);
+            if (!existingHashes.add(recordHash)) {
+                duplicates++;
                 continue;
             }
-
-            Element element = (Element) node;
-
-            String title =
-                    firstValue(
-                            element,
-                            "title",
-                            "name",
-                            "subject"
-                    );
-
-            String content =
-                    firstValue(
-                            element,
-                            "message",
-                            "text",
-                            "body",
-                            "content",
-                            "value"
-                    );
-
-            String sender =
-                    firstValue(
-                            element,
-                            "sender",
-                            "from",
-                            "source"
-                    );
-
-            String receiver =
-                    firstValue(
-                            element,
-                            "receiver",
-                            "recipient",
-                            "to",
-                            "target"
-                    );
-
-            String phone =
-                    firstValue(
-                            element,
-                            "phone",
-                            "phoneNumber",
-                            "number",
-                            "telephone"
-                    );
-
-            String contact =
-                    firstValue(
-                            element,
-                            "contactName",
-                            "name",
-                            "contact"
-                    );
-
-            String location =
-                    firstValue(
-                            element,
-                            "location",
-                            "address",
-                            "place"
-                    );
-
-            Double latitude =
-                    parseDouble(
-                            firstValue(
-                                    element,
-                                    "latitude",
-                                    "lat"
-                            )
-                    );
-
-            Double longitude =
-                    parseDouble(
-                            firstValue(
-                                    element,
-                                    "longitude",
-                                    "lon",
-                                    "lng"
-                            )
-                    );
-
-            String timestamp =
-                    firstValue(
-                            element,
-                            "timestamp",
-                            "time",
-                            "date",
-                            "datetime",
-                            "eventTime"
-                    );
-
-            Instant eventTime =
-                    parseInstant(timestamp);
-
-            /*
-             * Check against evidence already stored
-             * in the database.
-             */
-            boolean databaseDuplicate =
-                    evidenceRepository.existsDuplicate(
-                            device.getId(),
-                            artifactType,
-                            title,
-                            content,
-                            sender,
-                            receiver,
-                            phone,
-                            contact,
-                            location,
-                            eventTime
-                    );
-
-            if (databaseDuplicate) {
-                continue;
-            }
-
-            /*
-             * Check against evidence already extracted
-             * from the current XML/UFDR file.
-             */
-            boolean fileDuplicate =
-                    output.stream().anyMatch(e ->
-                            same(
-                                    e.getArtifactType(),
-                                    artifactType
-                            )
-                            && same(
-                                    e.getTitle(),
-                                    title
-                            )
-                            && same(
-                                    e.getContent(),
-                                    content
-                            )
-                            && same(
-                                    e.getSource(),
-                                    sender
-                            )
-                            && same(
-                                    e.getTarget(),
-                                    receiver
-                            )
-                            && same(
-                                    e.getPhoneNumber(),
-                                    phone
-                            )
-                            && same(
-                                    e.getContactName(),
-                                    contact
-                            )
-                            && same(
-                                    e.getLocation(),
-                                    location
-                            )
-                            && same(
-                                    e.getEventTime(),
-                                    eventTime
-                            )
-                    );
-
-            if (fileDuplicate) {
-                continue;
-            }
-
             Evidence evidence = new Evidence();
-
-            evidence.setArtifactType(artifactType);
-            evidence.setFileName(fileName);
             evidence.setDevice(device);
-
-            evidence.setTitle(title);
-            evidence.setContent(content);
-
-            evidence.setSource(sender);
-            evidence.setTarget(receiver);
-
-            evidence.setPhoneNumber(phone);
-            evidence.setContactName(contact);
-
-            evidence.setLocation(location);
-            evidence.setLatitude(latitude);
-            evidence.setLongitude(longitude);
-
-            evidence.setEventTime(eventTime);
-
-            output.add(evidence);
-        }
-    }
-
-    private boolean same(
-            Object a,
-            Object b
-    ) {
-
-        if (a == null && b == null) {
-            return true;
-        }
-
-        if (a == null || b == null) {
-            return false;
-        }
-
-        return a.equals(b);
-    }
-
-    private String firstValue(
-            Element element,
-            String... names
-    ) {
-
-        for (String name : names) {
-
-            NodeList nodes =
-                    element.getElementsByTagName(name);
-
-            if (nodes.getLength() == 0) {
-                continue;
+            evidence.setSourceFile(file);
+            evidence.setFileName(file.getOriginalFileName());
+            evidence.setHashSha256(file.getSha256());
+            evidence.setSourceRecordRef(record.sourceRecordRef());
+            evidence.setRecordHash(recordHash);
+            evidence.setArtifactType(record.artifactType());
+            evidence.setTitle(record.title());
+            evidence.setContent(record.content());
+            evidence.setSource(record.source());
+            evidence.setTarget(record.target());
+            evidence.setPhoneNumber(record.phoneNumber());
+            evidence.setContactName(record.contactName());
+            evidence.setLocation(record.location());
+            evidence.setLatitude(record.latitude());
+            evidence.setLongitude(record.longitude());
+            evidence.setEventTime(record.timestamp().instant());
+            evidence.setOriginalTimestamp(truncate(record.timestamp().originalText(), 120));
+            evidence.setOriginalTimezone(truncate(record.timestamp().originalTimezone(), 40));
+            evidence.setTimestampStatus(record.timestamp().status());
+            if (TIMESTAMP_ISSUES.contains(record.timestamp().status())) {
+                timestampIssues++;
             }
-
-            String value =
-                    nodes.item(0)
-                            .getTextContent();
-
-            if (value != null &&
-                    !value.isBlank()) {
-
-                return value.trim();
-            }
+            toSave.add(evidence);
         }
 
-        return null;
+        List<Evidence> saved = evidenceRepository.saveAll(toSave);
+        normalizationService.normalizeEvidence(saved, file.getSourceFormat().name());
+
+        file.setRecordsExtracted(saved.size());
+        file.setDuplicatesSkipped(duplicates);
+        file.setTimestampIssues(timestampIssues);
+        file.setProcessingStatus(EvidenceSourceFile.ProcessingStatus.PROCESSED);
+
+        return new ImportOutcome(device.getId(), device.getDeviceName(), resolution.created(), saved.size(), duplicates, timestampIssues);
     }
 
-    private Double parseDouble(
-            String value
-    ) {
-
-        if (value == null ||
-                value.isBlank()) {
-            return null;
+    /**
+     * SHA-256 over the record's extracted fields and original timestamp text. The location inside the
+     * source file is excluded so the same record arriving in a second extraction is recognised.
+     */
+    public static String recordHash(ExtractedRecord record) {
+        StringBuilder canonical = new StringBuilder();
+        for (Object value : new Object[]{
+                record.artifactType(), record.title(), record.content(), record.source(), record.target(),
+                record.phoneNumber(), record.contactName(), record.location(), record.latitude(), record.longitude(),
+                record.timestamp().originalText(), record.timestamp().originalTimezone()
+        }) {
+            canonical.append(value == null ? "␀" : value.toString()).append('\u001f');
         }
-
         try {
-
-            return Double.parseDouble(
-                    value.trim()
-            );
-
-        } catch (NumberFormatException e) {
-
-            return null;
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            return HexFormat.of().formatHex(digest.digest(canonical.toString().getBytes(StandardCharsets.UTF_8)));
+        } catch (NoSuchAlgorithmException ex) {
+            throw new IllegalStateException("SHA-256 is unavailable", ex);
         }
     }
 
-    private Instant parseInstant(
-            String value
-    ) {
-
-        if (value == null ||
-                value.isBlank()) {
-            return null;
-        }
-
-        try {
-
-            return Instant.parse(
-                    value.trim()
-            );
-
-        } catch (DateTimeParseException e) {
-
-            return null;
-        }
+    private static String truncate(String value, int max) {
+        return value == null || value.length() <= max ? value : value.substring(0, max);
     }
 }

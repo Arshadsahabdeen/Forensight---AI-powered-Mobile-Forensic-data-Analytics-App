@@ -3,6 +3,7 @@ package com.forensics.platform.service;
 import com.forensics.platform.dto.AuthDtos.*;
 import com.forensics.platform.entity.User;
 import com.forensics.platform.exception.AccountLockedException;
+import com.forensics.platform.exception.RefreshTokenException;
 import com.forensics.platform.entity.RoleName;
 import com.forensics.platform.repository.UserRepository;
 import com.forensics.platform.security.JwtService;
@@ -30,6 +31,13 @@ public class AuthService {
     private final AuditService auditService;
     private final RefreshTokenService refreshTokenService;
     private final long lockDurationMs;
+    private java.util.function.LongSupplier idleTimeoutMinutes;
+
+    /** Supplies the server-side idle limit (minutes) enforced on refresh; null disables the check. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setPlatformSettingsService(PlatformSettingsService settingsService) {
+        this.idleTimeoutMinutes = settingsService == null ? null : settingsService::effectiveIdleTimeoutMinutes;
+    }
 
     public AuthService(AuthenticationManager authenticationManager, UserDetailsService userDetailsService, UserRepository userRepository, JwtService jwtService, AuditService auditService, RefreshTokenService refreshTokenService, @Value("${app.security.account-lock-duration-ms}") long lockDurationMs) {
         this.authenticationManager = authenticationManager;
@@ -79,10 +87,19 @@ public class AuthService {
         );
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = RefreshTokenException.class)
     public RefreshTokenResponse refresh(@Valid RefreshTokenRequest request, HttpServletRequest httpRequest) {
         var oldToken = refreshTokenService.validateAndRevoke(request.refreshToken());
         User user = oldToken.getUser();
+        // Each refresh issues a new token, so the old token's creation time is the last time the session was used.
+        if (idleTimeoutMinutes != null && oldToken.getCreatedAt() != null
+                && oldToken.getCreatedAt().plus(java.time.Duration.ofMinutes(idleTimeoutMinutes.getAsLong())).isBefore(Instant.now())) {
+            auditService.record(user, "SESSION_EXPIRED", "Session ended after exceeding the idle timeout", httpRequest, false);
+            throw new RefreshTokenException("Session expired due to inactivity. Please sign in again.");
+        }
+        if (!user.isEnabled() || user.isTemporarilyLocked(Instant.now())) {
+            throw new RefreshTokenException("Account is disabled or locked");
+        }
         var details = userDetailsService.loadUserByUsername(user.getUsername());
         var newRefresh = refreshTokenService.issue(user, clientIp(httpRequest), httpRequest.getHeader("User-Agent"));
         auditService.record(user, "TOKEN_REFRESHED", "Refresh token rotated", httpRequest, true);

@@ -1,3 +1,6 @@
-fastapi==0.111.1
-uvicorn[standard]==0.30.3
-pydantic-settings==2.3.4
+fastapi==0.148.0
+uvicorn[standard]==0.54.0
+pydantic==2.13.5
+pydantic-settings==2.16.0
+# Optional generative engine. Only used when ANTHROPIC_API_KEY is set AND AI_ALLOW_EXTERNAL_PROCESSING=true.
+anthropic==1.14.0

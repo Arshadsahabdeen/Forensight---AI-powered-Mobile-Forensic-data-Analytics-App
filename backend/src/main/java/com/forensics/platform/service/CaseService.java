@@ -3,7 +3,9 @@ package com.forensics.platform.service;
 import com.forensics.platform.dto.CaseDtos.*;
 import com.forensics.platform.entity.CasePriority;
 import com.forensics.platform.entity.CaseStatus;
+import com.forensics.platform.entity.EvidenceSourceFile;
 import com.forensics.platform.entity.InvestigationCase;
+import com.forensics.platform.entity.InvestigationFinding;
 import com.forensics.platform.mapper.CaseMapper;
 import com.forensics.platform.repository.*;
 import org.springframework.data.domain.PageRequest;
@@ -11,39 +13,48 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
+import java.util.*;
 
 @Service
 public class CaseService {
     private final CaseRepository caseRepository;
     private final DeviceRepository deviceRepository;
     private final EvidenceRepository evidenceRepository;
+    private final EvidenceSourceFileRepository fileRepository;
     private final ReportRepository reportRepository;
-    private final UserRepository userRepository;
     private final AuditLogRepository auditLogRepository;
+    private final InvestigationFindingRepository findingRepository;
     private final AuditService auditService;
+    private final CaseAccessService caseAccessService;
     private final CaseMapper caseMapper;
 
-    public CaseService(CaseRepository caseRepository, DeviceRepository deviceRepository, EvidenceRepository evidenceRepository, ReportRepository reportRepository, UserRepository userRepository, AuditLogRepository auditLogRepository, AuditService auditService, CaseMapper caseMapper) {
+    public CaseService(CaseRepository caseRepository, DeviceRepository deviceRepository, EvidenceRepository evidenceRepository,
+                       EvidenceSourceFileRepository fileRepository, ReportRepository reportRepository, AuditLogRepository auditLogRepository,
+                       InvestigationFindingRepository findingRepository, AuditService auditService, CaseAccessService caseAccessService,
+                       CaseMapper caseMapper) {
         this.caseRepository = caseRepository;
         this.deviceRepository = deviceRepository;
         this.evidenceRepository = evidenceRepository;
+        this.fileRepository = fileRepository;
         this.reportRepository = reportRepository;
-        this.userRepository = userRepository;
         this.auditLogRepository = auditLogRepository;
+        this.findingRepository = findingRepository;
         this.auditService = auditService;
+        this.caseAccessService = caseAccessService;
         this.caseMapper = caseMapper;
     }
 
     @Transactional(readOnly = true)
     public CasePageResponse listCases(int page, int size, String sortBy, String sortDir, String search, String status, String priority, Authentication authentication) {
         var pageable = PageRequest.of(Math.max(0, page), Math.min(Math.max(size, 1), 100), sort(sortBy, sortDir));
-        Specification<InvestigationCase> specification = filters(search, status, priority, authentication);
+        Specification<InvestigationCase> specification = Specification.where(matchesSearch(search))
+                .and(matchesStatus(status))
+                .and(matchesPriority(priority))
+                .and((root, query, cb) -> caseAccessService.restrictToViewableCases(root, cb, authentication));
         var result = caseRepository.findAll(specification, pageable);
         return new CasePageResponse(
                 result.getContent().stream().map(caseMapper::toListItem).toList(),
@@ -56,120 +67,130 @@ public class CaseService {
         );
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public CaseDetailResponse getCase(Long id, Authentication authentication) {
-        InvestigationCase entity = caseRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Case not found"));
-        enforceCanView(entity, authentication);
-        auditService.record(authentication.getName(), "CASE_VIEWED", "Viewed case " + entity.getCaseNumber());
+        InvestigationCase entity = caseAccessService.requireViewable(id, authentication);
+        CaseAccessService.Actor actor = caseAccessService.actor(authentication);
+        auditService.record(new AuditService.Entry(null, authentication.getName(), "CASE_VIEWED",
+                "Viewed case " + entity.getCaseNumber(), true, id, "CASE", String.valueOf(id), null));
 
         var investigators = List.of(new InvestigatorAssignment(entity.getLeadInvestigator(), "Lead Investigator", "PRIMARY"));
         var devices = deviceRepository.findByInvestigationCaseId(id).stream()
-                .map(item -> new DeviceItem(item.getId(), item.getDeviceName(), item.getOperatingSystem(), item.getAcquisitionStatus()))
+                .map(item -> new DeviceItem(item.getId(), item.getDeviceName(), item.getOperatingSystem(), item.getAcquisitionStatus(),
+                        item.getImei(), evidenceRepository.countByDeviceId(item.getId())))
                 .toList();
-        var evidence = evidenceRepository.findByDeviceInvestigationCaseId(id).stream()
-                .map(item -> new EvidenceItem(item.getId(), item.getArtifactType(), item.getFileName(), item.getHashSha256(), item.getDevice() == null ? null : item.getDevice().getDeviceName(), item.getCreatedAt()))
-                .toList();
+
+        Map<String, Long> byType = new LinkedHashMap<>();
+        long totalRecords = 0;
+        for (Object[] row : evidenceRepository.countByArtifactTypeForCase(id)) {
+            long count = ((Number) row[1]).longValue();
+            byType.put(row[0] == null ? "UNKNOWN" : row[0].toString(), count);
+            totalRecords += count;
+        }
+        var files = fileRepository.findByInvestigationCaseIdOrderByImportedAtDesc(id);
+        long verified = files.stream().filter(f -> f.getIntegrityStatus() == EvidenceSourceFile.IntegrityStatus.VERIFIED).count();
+        long integrityIssues = files.stream().filter(f -> f.getIntegrityStatus() == EvidenceSourceFile.IntegrityStatus.MISMATCH
+                || f.getIntegrityStatus() == EvidenceSourceFile.IntegrityStatus.MISSING).count();
+        long failed = files.stream().filter(f -> f.getProcessingStatus() == EvidenceSourceFile.ProcessingStatus.FAILED).count();
+        var evidenceSummary = new EvidenceSummary(totalRecords, files.size(), byType, verified, integrityIssues, failed);
+
+        var findings = findingRepository.findByCaseIdOrderByCreatedAtAsc(id);
+        var findingSummary = new FindingSummary(
+                findings.size(),
+                findings.stream().filter(f -> f.getReviewStatus() == InvestigationFinding.ReviewStatus.NEEDS_REVIEW).count(),
+                findings.stream().filter(f -> f.getReviewStatus() == InvestigationFinding.ReviewStatus.REVIEWED).count(),
+                findings.stream().filter(InvestigationFinding::isAiGenerated).count()
+        );
+
         var reports = reportRepository.findByInvestigationCaseId(id).stream()
-                .map(item -> new ReportItem(item.getId(), item.getReportNumber(), item.getStatus(), item.getGeneratedAt()))
+                .sorted(Comparator.comparing((com.forensics.platform.entity.Report r) -> r.getGeneratedAt() == null ? java.time.Instant.EPOCH : r.getGeneratedAt()).reversed())
+                .map(item -> new ReportItem(item.getId(), item.getReportNumber(), item.getReportTitle(), item.getStatus(), item.getGeneratedAt(),
+                        item.getSnapshotJson() != null))
                 .toList();
-        var activity = auditLogRepository.findTop100ByDescriptionContainingIgnoreCaseOrderByTimestampDesc(entity.getCaseNumber()).stream()
-                .map(item -> new ActivityItem(item.getId(), item.getUsername(), item.getAction(), item.getDescription(), item.getTimestamp()))
-                .toList();
+
+        // Case-linked audit entries, plus older entries that only mention the case number in their description.
+        Map<Long, ActivityItem> activity = new TreeMap<>(Comparator.reverseOrder());
+        auditLogRepository.findTop200ByCaseIdOrderByIdDesc(id).forEach(item -> activity.put(item.getId(), toActivity(item)));
+        auditLogRepository.findTop100ByDescriptionContainingIgnoreCaseOrderByTimestampDesc(entity.getCaseNumber())
+                .forEach(item -> activity.putIfAbsent(item.getId(), toActivity(item)));
 
         return new CaseDetailResponse(
                 caseMapper.toResponse(entity),
                 investigators,
                 devices,
-                evidence,
-                activity,
+                evidenceSummary,
+                findingSummary,
                 reports,
-                entity.getNotes(),
-                activity
+                activity.values().stream().limit(200).toList(),
+                caseAccessService.canEdit(entity, actor),
+                actor.admin() && totalRecords == 0 && files.isEmpty()
         );
     }
 
     @Transactional
     public CaseResponse createCase(CaseRequest request, Authentication authentication) {
+        CaseAccessService.Actor actor = caseAccessService.actor(authentication);
+        if (!actor.canWrite()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Insufficient permission");
+        }
         if (caseRepository.existsByCaseNumberIgnoreCase(request.caseNumber().trim())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Case number already exists");
         }
-
-        String assignedLead = request.leadInvestigator();
-        if (isInvestigatorOnly(authentication)) {
-            assignedLead = currentInvestigatorName(authentication);
-        }
-
-        CaseRequest normalized = new CaseRequest(
-                request.caseNumber(),
-                request.title(),
-                request.description(),
-                request.status(),
-                request.priority(),
-                assignedLead,
-                request.category(),
-                request.caseType(),
-                request.location(),
-                request.notes()
-        );
-
-        InvestigationCase entity = caseMapper.toEntity(normalized);
+        // Investigators always lead the cases they open; administrators may assign anyone.
+        String assignedLead = actor.admin() ? request.leadInvestigator() : actor.fullName();
+        InvestigationCase entity = caseMapper.toEntity(withLead(request, assignedLead));
         InvestigationCase saved = caseRepository.save(entity);
-        auditService.record(authentication.getName(), "CASE_CREATED", "Created case " + saved.getCaseNumber());
+        auditService.record(new AuditService.Entry(null, authentication.getName(), "CASE_CREATED",
+                "Created case " + saved.getCaseNumber(), true, saved.getId(), "CASE", String.valueOf(saved.getId()), null));
         return caseMapper.toResponse(saved);
     }
 
     @Transactional
     public CaseResponse updateCase(Long id, CaseRequest request, Authentication authentication) {
-        InvestigationCase entity = caseRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Case not found"));
-        enforceCanEdit(entity, authentication);
-
+        InvestigationCase entity = caseAccessService.requireEditable(id, authentication);
         if (caseRepository.existsByCaseNumberIgnoreCaseAndIdNot(request.caseNumber().trim(), id)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Case number already exists");
         }
-
-        String assignedLead = isInvestigatorOnly(authentication) ? entity.getLeadInvestigator() : request.leadInvestigator();
-        CaseRequest normalized = new CaseRequest(
-                request.caseNumber(),
-                request.title(),
-                request.description(),
-                request.status(),
-                request.priority(),
-                assignedLead,
-                request.category(),
-                request.caseType(),
-                request.location(),
-                request.notes()
-        );
-
-        caseMapper.applyRequest(entity, normalized);
+        // Only administrators can reassign the lead investigator.
+        String assignedLead = caseAccessService.actor(authentication).admin() ? request.leadInvestigator() : entity.getLeadInvestigator();
+        String previousStatus = entity.getStatus().name();
+        caseMapper.applyRequest(entity, withLead(request, assignedLead));
         InvestigationCase saved = caseRepository.save(entity);
-        auditService.record(authentication.getName(), "CASE_UPDATED", "Updated case " + saved.getCaseNumber());
+        String change = previousStatus.equals(saved.getStatus().name()) ? "" : " (status " + previousStatus + " → " + saved.getStatus() + ")";
+        auditService.record(new AuditService.Entry(null, authentication.getName(), "CASE_UPDATED",
+                "Updated case " + saved.getCaseNumber() + change, true, id, "CASE", String.valueOf(id), null));
         return caseMapper.toResponse(saved);
     }
 
+    /**
+     * Deletes a case only when it holds no evidence. Cases with evidence must be archived instead,
+     * so original evidence, derived records and their audit trail are never destroyed.
+     */
     @Transactional
     public void deleteCase(Long id, Authentication authentication) {
-        InvestigationCase entity = caseRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Case not found"));
-        if (!hasRole(authentication, "ROLE_ADMIN")) {
+        if (!caseAccessService.actor(authentication).admin()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only administrators can delete cases");
         }
-
-        evidenceRepository.deleteByDeviceInvestigationCaseId(id);
+        InvestigationCase entity = caseRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Case not found"));
+        if (fileRepository.countByInvestigationCaseId(id) > 0 || evidenceRepository.countByDeviceInvestigationCaseId(id) > 0) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "This case contains evidence and cannot be deleted. Set its status to ARCHIVED to preserve the evidence and audit trail.");
+        }
         reportRepository.deleteByInvestigationCaseId(id);
         deviceRepository.deleteByInvestigationCaseId(id);
         caseRepository.delete(entity);
-
-        auditService.record(authentication.getName(), "CASE_DELETED", "Deleted case " + entity.getCaseNumber());
+        auditService.record(new AuditService.Entry(null, authentication.getName(), "CASE_DELETED",
+                "Deleted case " + entity.getCaseNumber() + " (no evidence was attached)", true, id, "CASE", String.valueOf(id), null));
     }
 
-    private Specification<InvestigationCase> filters(String search, String status, String priority, Authentication authentication) {
-        return Specification.where(matchesSearch(search))
-                .and(matchesStatus(status))
-                .and(matchesPriority(priority))
-                .and(assignedCasesFilter(authentication));
+    private CaseRequest withLead(CaseRequest request, String lead) {
+        return new CaseRequest(request.caseNumber(), request.title(), request.description(), request.status(), request.priority(),
+                lead, request.category(), request.caseType(), request.location(), request.notes());
+    }
+
+    private ActivityItem toActivity(com.forensics.platform.entity.AuditLog item) {
+        return new ActivityItem(item.getId(), item.getUsername(), item.getAction(), item.getDescription(), item.getTimestamp(), item.isSuccess());
     }
 
     private Specification<InvestigationCase> matchesSearch(String search) {
@@ -177,7 +198,7 @@ public class CaseService {
             if (search == null || search.isBlank()) {
                 return cb.conjunction();
             }
-            String q = "%" + search.trim().toLowerCase() + "%";
+            String q = "%" + search.trim().toLowerCase(Locale.ROOT) + "%";
             return cb.or(
                     cb.like(cb.lower(root.get("caseNumber")), q),
                     cb.like(cb.lower(root.get("title")), q),
@@ -191,86 +212,29 @@ public class CaseService {
     }
 
     private Specification<InvestigationCase> matchesStatus(String status) {
-        return (root, query, cb) -> {
-            if (status == null || status.isBlank()) {
-                return cb.conjunction();
-            }
-            try {
-                return cb.equal(root.get("status"), CaseStatus.valueOf(status.trim().toUpperCase()));
-            } catch (IllegalArgumentException ex) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid status filter");
-            }
-        };
+        if (status == null || status.isBlank()) {
+            return (root, query, cb) -> cb.conjunction();
+        }
+        CaseStatus parsed;
+        try {
+            parsed = CaseStatus.valueOf(status.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid status filter");
+        }
+        return (root, query, cb) -> cb.equal(root.get("status"), parsed);
     }
 
     private Specification<InvestigationCase> matchesPriority(String priority) {
-        return (root, query, cb) -> {
-            if (priority == null || priority.isBlank()) {
-                return cb.conjunction();
-            }
-            try {
-                return cb.equal(root.get("priority"), CasePriority.valueOf(priority.trim().toUpperCase()));
-            } catch (IllegalArgumentException ex) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid priority filter");
-            }
-        };
-    }
-
-    private Specification<InvestigationCase> assignedCasesFilter(Authentication authentication) {
-        return (root, query, cb) -> {
-            if (authentication == null || !isInvestigatorOnly(authentication)) {
-                return cb.conjunction();
-            }
-            String principalName = authentication.getName();
-            String investigatorName = currentInvestigatorName(authentication);
-            return cb.or(
-                    cb.equal(root.get("leadInvestigator"), principalName),
-                    cb.equal(root.get("leadInvestigator"), investigatorName)
-            );
-        };
-    }
-
-    private void enforceCanView(InvestigationCase entity, Authentication authentication) {
-        if (hasRole(authentication, "ROLE_ADMIN") || hasRole(authentication, "ROLE_REVIEWER")) {
-            return;
+        if (priority == null || priority.isBlank()) {
+            return (root, query, cb) -> cb.conjunction();
         }
-        if (!isAssignedToInvestigator(entity, authentication)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Investigators can only access assigned cases");
+        CasePriority parsed;
+        try {
+            parsed = CasePriority.valueOf(priority.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid priority filter");
         }
-    }
-
-    private void enforceCanEdit(InvestigationCase entity, Authentication authentication) {
-        if (hasRole(authentication, "ROLE_ADMIN")) {
-            return;
-        }
-        if (!hasRole(authentication, "ROLE_INVESTIGATOR")) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Insufficient permission");
-        }
-        if (!isAssignedToInvestigator(entity, authentication)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Investigators can only edit assigned cases");
-        }
-    }
-
-    private boolean isAssignedToInvestigator(InvestigationCase entity, Authentication authentication) {
-        String principalName = authentication.getName();
-        String investigatorName = currentInvestigatorName(authentication);
-        return principalName.equalsIgnoreCase(entity.getLeadInvestigator()) || investigatorName.equalsIgnoreCase(entity.getLeadInvestigator());
-    }
-
-    private String currentInvestigatorName(Authentication authentication) {
-        return userRepository.findByUsername(authentication.getName())
-                .map(user -> user.getFullName())
-                .orElse(authentication.getName());
-    }
-
-    private boolean isInvestigatorOnly(Authentication authentication) {
-        return hasRole(authentication, "ROLE_INVESTIGATOR") && !hasRole(authentication, "ROLE_ADMIN");
-    }
-
-    private boolean hasRole(Authentication authentication, String role) {
-        return authentication != null && authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .anyMatch(role::equals);
+        return (root, query, cb) -> cb.equal(root.get("priority"), parsed);
     }
 
     private Sort sort(String sortBy, String sortDir) {
@@ -284,6 +248,6 @@ public class CaseService {
             default -> "updatedAt";
         };
         Sort.Direction direction = "asc".equalsIgnoreCase(sortDir) ? Sort.Direction.ASC : Sort.Direction.DESC;
-        return Sort.by(direction, property);
+        return Sort.by(direction, property).and(Sort.by(Sort.Direction.ASC, "id"));
     }
 }

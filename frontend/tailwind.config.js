@@ -4,14 +4,26 @@ export default {
   theme: {
     extend: {
       colors: {
-        slatepanel: '#101820',
-        ink: '#0b1117',
-        steel: '#1b2a34',
-        cyanline: '#46b3c7',
-        signal: '#74a892'
+        // Single accent colour used for primary actions, links and focus states.
+        brand: {
+          50: '#eff6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd',
+          500: '#3b82f6',
+          600: '#2563eb',
+          700: '#1d4ed8',
+          800: '#1e40af',
+          900: '#1e3a8a'
+        }
+      },
+      fontFamily: {
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace']
       },
       boxShadow: {
-        forensic: '0 18px 50px rgba(0, 0, 0, 0.32)'
+        card: '0 1px 2px rgba(15, 23, 42, 0.05)',
+        overlay: '0 12px 32px rgba(15, 23, 42, 0.18)'
       }
     }
   },

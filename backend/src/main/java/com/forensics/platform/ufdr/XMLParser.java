@@ -1,120 +1,83 @@
 package com.forensics.platform.ufdr;
 
-import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.util.*;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.io.InputStream;
 
-@Component
-public class XMLParser {
+/**
+ * Hardened DOM parsing for untrusted evidence XML: DOCTYPE declarations, external entities,
+ * external DTD/schema access and XInclude are all disabled (prevents XXE and entity expansion).
+ */
+public final class XMLParser {
 
-    public Map<String, Object> parse(MultipartFile file) throws Exception {
-
-        Document document = DocumentBuilderFactory
-                .newInstance()
-                .newDocumentBuilder()
-                .parse(file.getInputStream());
-
-        document.getDocumentElement().normalize();
-
-        Map<String, Object> result = new HashMap<>();
-
-        result.put("root", document.getDocumentElement().getNodeName());
-
-        result.put("device", extractDevice(document));
-
-        result.put("contacts", extractContacts(document));
-
-        result.put("messages", extractMessages(document));
-
-        return result;
-
+    private XMLParser() {
     }
 
-    private Map<String,Object> extractDevice(Document document){
-
-        Map<String,Object> device = new HashMap<>();
-
-        NodeList list = document.getElementsByTagName("device");
-
-        if(list.getLength()==0)
-            return device;
-
-        Element e = (Element) list.item(0);
-
-        device.put("manufacturer", value(e,"manufacturer"));
-
-        device.put("brand", value(e,"brand"));
-
-        device.put("model", value(e,"model"));
-
-        device.put("imei", value(e,"imei"));
-
-        return device;
-
+    public static Document parse(InputStream input) throws IOException, EvidenceFormatException {
+        try {
+            DocumentBuilder builder = factory().newDocumentBuilder();
+            builder.setErrorHandler(new SilentErrorHandler());
+            builder.setEntityResolver((publicId, systemId) -> {
+                throw new SAXException("External entities are not allowed");
+            });
+            Document document = builder.parse(input);
+            document.getDocumentElement().normalize();
+            return document;
+        } catch (SAXParseException ex) {
+            if (isDoctype(ex)) {
+                throw new EvidenceFormatException("XML DOCTYPE declarations are not allowed in evidence files.");
+            }
+            throw new EvidenceFormatException("Malformed XML at line " + ex.getLineNumber() + ", column " + ex.getColumnNumber() + ".");
+        } catch (SAXException ex) {
+            throw new EvidenceFormatException("The XML could not be parsed safely.");
+        } catch (ParserConfigurationException ex) {
+            throw new IllegalStateException("Secure XML parser configuration is unavailable", ex);
+        }
     }
 
-    private List<Map<String,Object>> extractContacts(Document document){
+    private static DocumentBuilderFactory factory() throws ParserConfigurationException {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        factory.setXIncludeAware(false);
+        factory.setExpandEntityReferences(false);
+        factory.setNamespaceAware(false);
+        factory.setValidating(false);
+        return factory;
+    }
 
-        List<Map<String,Object>> contacts = new ArrayList<>();
+    private static boolean isDoctype(SAXParseException ex) {
+        String message = ex.getMessage();
+        return message != null && message.contains("DOCTYPE");
+    }
 
-        NodeList list = document.getElementsByTagName("contact");
-
-        for(int i=0;i<list.getLength();i++){
-
-            Element e=(Element)list.item(i);
-
-            Map<String,Object> contact=new HashMap<>();
-
-            contact.put("name",value(e,"name"));
-
-            contact.put("phone",value(e,"phone"));
-
-            contacts.add(contact);
-
+    private static final class SilentErrorHandler implements ErrorHandler {
+        @Override
+        public void warning(SAXParseException exception) {
+            // ignore warnings
         }
 
-        return contacts;
-
-    }
-
-    private List<Map<String,Object>> extractMessages(Document document){
-
-        List<Map<String,Object>> messages=new ArrayList<>();
-
-        NodeList list=document.getElementsByTagName("message");
-
-        for(int i=0;i<list.getLength();i++){
-
-            Element e=(Element)list.item(i);
-
-            Map<String,Object> sms=new HashMap<>();
-
-            sms.put("from",value(e,"from"));
-
-            sms.put("body",value(e,"body"));
-
-            sms.put("timestamp",value(e,"timestamp"));
-
-            messages.add(sms);
-
+        @Override
+        public void error(SAXParseException exception) throws SAXException {
+            throw exception;
         }
 
-        return messages;
-
+        @Override
+        public void fatalError(SAXParseException exception) throws SAXException {
+            throw exception;
+        }
     }
-
-    private String value(Element e,String tag){
-
-        NodeList list=e.getElementsByTagName(tag);
-
-        if(list.getLength()==0)
-            return "";
-
-        return list.item(0).getTextContent();
-
-    }
-
 }

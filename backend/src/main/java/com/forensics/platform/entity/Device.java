@@ -11,7 +11,8 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Table(name = "device", indexes = {
-        @Index(name = "idx_device_imei", columnList = "imei", unique = true),
+        @Index(name = "idx_device_case_imei", columnList = "investigation_case_id, imei", unique = true),
+        @Index(name = "idx_device_imei_lookup", columnList = "imei"),
         @Index(name = "idx_device_status", columnList = "acquisition_status"),
         @Index(name = "idx_device_case", columnList = "investigation_case_id"),
         @Index(name = "idx_device_manufacturer", columnList = "manufacturer")
@@ -28,7 +29,8 @@ public class Device {
     private String model;
     @Column(length = 160)
     private String deviceName;
-    @Column(length = 40, unique = true)
+    /** Unique within a case (the same handset may be examined in several cases). */
+    @Column(length = 40)
     private String imei;
     @Column(length = 120)
     private String serialNumber;

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Synthetic sample extraction for development and testing only. Not real evidence.
+  Shares identifiers with device-a-android.xml so cross-device correlation can be exercised.
+-->
+<UFDR>
+    <device>
+        <manufacturer>Apple</manufacturer>
+        <brand>Apple</brand>
+        <model>iPhone 15</model>
+        <imei>353918108765432</imei>
+        <operatingSystem>iOS</operatingSystem>
+        <osVersion>18.2</osVersion>
+    </device>
+
+    <contact>
+        <name>Mehta (work)</name>
+        <phone>9845011223</phone>
+    </contact>
+    <contact>
+        <name>Courier</name>
+        <phone>+91 99001 12233</phone>
+    </contact>
+
+    <sms>
+        <sender>+919900112233</sender>
+        <receiver>+919845011223</receiver>
+        <message>Pickup at 11. Bring the invoice copies.</message>
+        <timestamp>2026-07-14T03:50:00Z</timestamp>
+    </sms>
+    <sms>
+        <sender>9845011223</sender>
+        <receiver>9900112233</receiver>
+        <message>Invoices ready. Meet at the north gate.</message>
+        <timestamp>2026-07-14T10:40:00+05:30</timestamp>
+    </sms>
+
+    <call>
+        <sender>+919845011223</sender>
+        <receiver>+919900112233</receiver>
+        <direction>Incoming</direction>
+        <duration>184</duration>
+        <timestamp>2026-07-14T05:10:00Z</timestamp>
+    </call>
+
+    <location>
+        <latitude>12.9721</latitude>
+        <longitude>77.5952</longitude>
+        <address>Bengaluru Central</address>
+        <timestamp>2026-07-14T11:05:00+05:30</timestamp>
+    </location>
+</UFDR>

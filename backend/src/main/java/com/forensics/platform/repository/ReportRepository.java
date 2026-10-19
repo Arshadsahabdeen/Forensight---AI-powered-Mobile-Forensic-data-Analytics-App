@@ -23,6 +23,9 @@ public interface ReportRepository
 
     List<Report> findTop10ByOrderByGeneratedAtDesc();
 
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = "investigationCase")
+    List<Report> findTop200ByOrderByGeneratedAtDesc();
+
     long countByStatusIgnoreCase(String status);
 
     long countByGeneratedAtBetween(

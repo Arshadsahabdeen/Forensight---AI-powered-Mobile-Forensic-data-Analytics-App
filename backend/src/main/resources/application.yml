@@ -1,5 +1,8 @@
 server:
   port: 8080
+  error:
+    include-stacktrace: never
+    include-message: never
 
 spring:
   application:
@@ -14,10 +17,16 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        jdbc:
+          time_zone: UTC
     open-in-view: false
   flyway:
     enabled: true
     baseline-on-migrate: true
+  servlet:
+    multipart:
+      max-file-size: ${UPLOAD_MAX_FILE_SIZE:100MB}
+      max-request-size: ${UPLOAD_MAX_REQUEST_SIZE:105MB}
 
 app:
   security:
@@ -26,8 +35,25 @@ app:
     jwt-refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION:604800000}
     account-lock-duration-ms: ${ACCOUNT_LOCK_DURATION:900000}
     seed-development-users: ${SEED_DEVELOPMENT_USERS:true}
+  seed:
+    demo-cases: ${SEED_DEMO_CASES:${SEED_DEVELOPMENT_USERS:true}}
   cors:
     allowed-origins: ${FRONTEND_URL:http://localhost:5173,http://localhost:3000}
+  storage:
+    # Original evidence files are stored here, read-only and content-addressed. Back this directory up.
+    evidence-root: ${EVIDENCE_STORAGE_DIR:./data/evidence}
+  upload:
+    max-bytes: ${UPLOAD_MAX_BYTES:104857600}
+  ingestion:
+    max-xml-bytes: ${INGESTION_MAX_XML_BYTES:209715200}
+    max-archive-entries: ${INGESTION_MAX_ARCHIVE_ENTRIES:20000}
+  processing:
+    async: ${PROCESSING_ASYNC:true}
+    workers: ${PROCESSING_WORKERS:2}
+  ai:
+    service-url: ${AI_SERVICE_URL:http://localhost:8000}
+    timeout-seconds: ${AI_TIMEOUT_SECONDS:60}
+    max-records: ${AI_MAX_RECORDS:150}
 
 springdoc:
   swagger-ui:

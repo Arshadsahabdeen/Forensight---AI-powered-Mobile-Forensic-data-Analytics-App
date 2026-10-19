@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Synthetic sample extraction for development and testing only. Not real evidence.
+  Exercises: offset timestamps, local timestamps without a zone, epoch milliseconds,
+  a missing timestamp, an unparseable timestamp, nested location fields inside media,
+  and identifiers shared with device-b-iphone.xml (cross-device correlation).
+-->
+<UFDR>
+    <device>
+        <manufacturer>Google</manufacturer>
+        <brand>Google</brand>
+        <model>Pixel 8</model>
+        <imei>356938035643809</imei>
+        <serialNumber>PX8-DEMO-0001</serialNumber>
+        <operatingSystem>Android</operatingSystem>
+        <osVersion>15</osVersion>
+    </device>
+
+    <contact>
+        <name>R. Mehta</name>
+        <phone>+91 98450 11223</phone>
+    </contact>
+    <contact>
+        <name>Warehouse Desk</name>
+        <phone>080-4455-6677</phone>
+    </contact>
+
+    <sms>
+        <sender>+919845011223</sender>
+        <receiver>+919900112233</receiver>
+        <message>Shipment moved to the north gate. Confirm pickup time.</message>
+        <timestamp>2026-07-14T09:12:00+05:30</timestamp>
+    </sms>
+    <sms>
+        <sender>+919900112233</sender>
+        <receiver>+919845011223</receiver>
+        <message>Pickup at 11. Bring the invoice copies.</message>
+        <timestamp>2026-07-14T09:20:00+05:30</timestamp>
+    </sms>
+    <sms>
+        <sender>+919900112233</sender>
+        <receiver>08044556677</receiver>
+        <message>Gate pass requested for tomorrow morning.</message>
+        <timestamp>2026-07-14 18:45:00</timestamp>
+    </sms>
+
+    <call>
+        <sender>+919900112233</sender>
+        <receiver>+919845011223</receiver>
+        <direction>Outgoing</direction>
+        <duration>184</duration>
+        <timestamp>1784005800000</timestamp>
+    </call>
+    <call>
+        <sender>+919812345678</sender>
+        <receiver>+919900112233</receiver>
+        <direction>Incoming</direction>
+        <duration>0</duration>
+        <timestamp>not-recorded</timestamp>
+    </call>
+
+    <location>
+        <latitude>12.9716</latitude>
+        <longitude>77.5946</longitude>
+        <address>Bengaluru Central</address>
+        <timestamp>2026-07-14T10:55:00+05:30</timestamp>
+    </location>
+
+    <photo>
+        <fileName>IMG_20260714_1102.jpg</fileName>
+        <timestamp>2026-07-14T11:02:10+05:30</timestamp>
+        <location>
+            <latitude>12.9719</latitude>
+            <longitude>77.5949</longitude>
+        </location>
+    </photo>
+
+    <browserHistory>
+        <title>Freight tracking</title>
+        <url>https://example.com/track?ref=DEMO-4471</url>
+        <timestamp>2026-07-14T08:58:00Z</timestamp>
+    </browserHistory>
+
+    <sms>
+        <sender>+919845011223</sender>
+        <receiver>+919900112233</receiver>
+        <message>Draft saved without a timestamp.</message>
+    </sms>
+</UFDR>

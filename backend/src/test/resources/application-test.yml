@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:forensight;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;NON_KEYWORDS=TIMESTAMP,VALUE,KEY,USER,YEAR,MONTH,DAY;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: false
+  flyway:
+    enabled: false
+
+app:
+  security:
+    seed-development-users: true
+  seed:
+    demo-cases: false
+  storage:
+    # Unique per test run so files from earlier runs (including deliberately tampered ones) never interfere.
+    evidence-root: ${java.io.tmpdir}/forensight-test-evidence/${random.uuid}
+  processing:
+    async: false
+  ai:
+    # Deliberately unreachable so tests exercise the documented fallback path.
+    service-url: http://127.0.0.1:9
+    timeout-seconds: 5

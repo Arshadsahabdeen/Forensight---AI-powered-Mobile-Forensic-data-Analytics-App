@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_DB: forensic_platform
       POSTGRES_USER: forensics
-      POSTGRES_PASSWORD: forensics
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-forensics}
     ports:
       - "5432:5432"
     volumes:
@@ -16,29 +16,49 @@ services:
       timeout: 5s
       retries: 5
 
+  ai-service:
+    build: ./ai-service
+    container_name: forensic-ai-service
+    environment:
+      # Generative analysis is opt-in. Without BOTH values the local extractive engine is used
+      # and no evidence leaves the platform.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      AI_ALLOW_EXTERNAL_PROCESSING: ${AI_ALLOW_EXTERNAL_PROCESSING:-false}
+      AI_MODEL: ${AI_MODEL:-claude-opus-5-5}
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
   backend:
     build: ./backend
     container_name: forensic-backend
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/forensic_platform
       SPRING_DATASOURCE_USERNAME: forensics
-      SPRING_DATASOURCE_PASSWORD: forensics
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-forensics}
       JWT_SECRET: ${JWT_SECRET:-compose-development-secret-change-before-production-at-least-sixty-four-characters-long}
       JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION:-900000}
       JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION:-604800000}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000,http://localhost:5173}
       SEED_DEVELOPMENT_USERS: ${SEED_DEVELOPMENT_USERS:-true}
+      SEED_DEMO_CASES: ${SEED_DEMO_CASES:-true}
+      AI_SERVICE_URL: http://ai-service:8000
+      EVIDENCE_STORAGE_DIR: /app/data/evidence
+      UPLOAD_MAX_BYTES: ${UPLOAD_MAX_BYTES:-104857600}
     ports:
       - "8080:8080"
+    volumes:
+      # Original evidence files. Back this volume up together with the database.
+      - evidence-data:/app/data/evidence
     depends_on:
       postgres:
         condition: service_healthy
-
-  ai-service:
-    build: ./ai-service
-    container_name: forensic-ai-service
-    ports:
-      - "8000:8000"
+      ai-service:
+        condition: service_started
 
   frontend:
     build: ./frontend
@@ -47,7 +67,7 @@ services:
       - "3000:80"
     depends_on:
       - backend
-      - ai-service
 
 volumes:
   postgres-data:
+  evidence-data:

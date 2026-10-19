@@ -39,7 +39,9 @@ public class RefreshTokenService {
         return new IssuedRefreshToken(rawToken, token);
     }
 
-    @Transactional
+    // noRollbackFor: an expired token's revocation must be committed, and the caller must receive the
+    // RefreshTokenException (401) rather than an UnexpectedRollbackException.
+    @Transactional(noRollbackFor = RefreshTokenException.class)
     public RefreshToken validateAndRevoke(String rawToken) {
         RefreshToken token = refreshTokenRepository.findByTokenHash(hash(rawToken))
                 .orElseThrow(() -> new RefreshTokenException("Invalid refresh token"));

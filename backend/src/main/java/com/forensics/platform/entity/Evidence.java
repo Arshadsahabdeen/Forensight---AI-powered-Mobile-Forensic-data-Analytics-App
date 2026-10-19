@@ -14,7 +14,9 @@ import java.time.Instant;
         indexes = {
                 @Index(name = "idx_evidence_artifact_type", columnList = "artifact_type"),
                 @Index(name = "idx_evidence_device", columnList = "device_id"),
-                @Index(name = "idx_evidence_created_at", columnList = "created_at")
+                @Index(name = "idx_evidence_created_at", columnList = "created_at"),
+                @Index(name = "idx_evidence_source_file", columnList = "source_file_id"),
+                @Index(name = "idx_evidence_device_record_hash", columnList = "device_id, record_hash")
         }
 )
 public class Evidence {
@@ -64,6 +66,36 @@ public class Evidence {
      * Original artifact timestamp when available.
      */
     private Instant eventTime;
+
+    /*
+     * Timestamp exactly as it appeared in the source file, the timezone/offset it declared
+     * (if any), and how the normalized eventTime was derived from it.
+     */
+    @Column(length = 120)
+    private String originalTimestamp;
+
+    @Column(length = 40)
+    private String originalTimezone;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private TimestampStatus timestampStatus;
+
+    /*
+     * Provenance: the original evidence file and the location of this record inside it.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "source_file_id")
+    private EvidenceSourceFile sourceFile;
+
+    @Column(length = 255)
+    private String sourceRecordRef;
+
+    /*
+     * SHA-256 over the record's extracted fields; used to skip duplicate records per device.
+     */
+    @Column(length = 64)
+    private String recordHash;
 
     /*
      * Database insertion timestamp.

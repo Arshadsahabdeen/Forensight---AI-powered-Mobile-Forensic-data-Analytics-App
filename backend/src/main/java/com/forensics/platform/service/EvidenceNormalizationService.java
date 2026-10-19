@@ -77,7 +77,7 @@ public class EvidenceNormalizationService {
         normalizedEvidence.setCreatedAt(evidence.getCreatedAt() == null ? Instant.now() : evidence.getCreatedAt());
 
         switch (category) {
-            case COMMUNICATION -> normalizeCommunication(normalizedEvidence, evidence);
+            case COMMUNICATION, OTHER -> normalizeCommunication(normalizedEvidence, evidence);
             case LOCATION -> normalizeLocation(normalizedEvidence, evidence);
             case CONTACT, ACCOUNT -> normalizeContact(normalizedEvidence, evidence);
             case MEDIA -> normalizeMedia(normalizedEvidence, evidence);
@@ -127,6 +127,11 @@ public class EvidenceNormalizationService {
         return normalizedEvidenceRepository.findById(id)
                 .map(this::toResponse)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Normalized evidence not found."));
+    }
+
+    @Transactional(readOnly = true)
+    public java.util.Optional<NormalizedEvidenceResponse> getBySourceEvidenceId(Long evidenceId) {
+        return normalizedEvidenceRepository.findBySourceEvidenceId(evidenceId).map(this::toResponse);
     }
 
     @Transactional(readOnly = true)
@@ -250,7 +255,8 @@ public class EvidenceNormalizationService {
     }
 
     private String buildAiReadyText(Evidence evidence) {
-        return clean(String.join(" | ", List.of(
+        // Arrays.asList (not List.of): individual fields are frequently null.
+        return clean(String.join(" | ", java.util.Arrays.asList(
                 clean(evidence.getArtifactType()),
                 clean(evidence.getTitle()),
                 clean(evidence.getContent()),
@@ -336,32 +342,7 @@ public class EvidenceNormalizationService {
     }
 
     private NormalizedEvidenceCategory resolveCategory(String artifactType) {
-        return switch (artifactType) {
-            case "SMS", "CALL", "MESSAGE", "EMAIL", "CHAT", "MESSAGING_APP" -> NormalizedEvidenceCategory.COMMUNICATION;
-            case "LOCATION", "GPS", "CELL_TOWER", "WIFI_LOCATION" -> NormalizedEvidenceCategory.LOCATION;
-            case "CONTACT" -> NormalizedEvidenceCategory.CONTACT;
-            case "PHOTO", "IMAGE", "VIDEO", "DOCUMENT", "MEDIA" -> NormalizedEvidenceCategory.MEDIA;
-            case "BROWSER", "BROWSER_HISTORY", "URL", "SEARCH", "DOWNLOAD" -> NormalizedEvidenceCategory.BROWSER;
-            case "ACCOUNT", "PROFILE" -> NormalizedEvidenceCategory.ACCOUNT;
-            default -> {
-                if (artifactType.contains("CALL") || artifactType.contains("SMS") || artifactType.contains("MESSAGE")) {
-                    yield NormalizedEvidenceCategory.COMMUNICATION;
-                }
-                if (artifactType.contains("CONTACT")) {
-                    yield NormalizedEvidenceCategory.CONTACT;
-                }
-                if (artifactType.contains("PHOTO") || artifactType.contains("VIDEO") || artifactType.contains("MEDIA")) {
-                    yield NormalizedEvidenceCategory.MEDIA;
-                }
-                if (artifactType.contains("BROWSER") || artifactType.contains("SEARCH") || artifactType.contains("URL")) {
-                    yield NormalizedEvidenceCategory.BROWSER;
-                }
-                if (artifactType.contains("ACCOUNT") || artifactType.contains("PROFILE")) {
-                    yield NormalizedEvidenceCategory.ACCOUNT;
-                }
-                yield NormalizedEvidenceCategory.LOCATION;
-            }
-        };
+        return EvidenceCategories.resolve(artifactType);
     }
 
     private String normalizeArtifactType(String value) {

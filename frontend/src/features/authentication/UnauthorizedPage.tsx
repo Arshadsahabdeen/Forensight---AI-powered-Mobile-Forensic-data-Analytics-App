@@ -1,20 +1,26 @@
-import { ShieldAlert } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ShieldAlert, SearchX } from 'lucide-react';
+import { LinkButton } from '../../components/ui/Button';
 
 export function UnauthorizedPage() {
   return (
-    <div className="flex min-h-[70vh] items-center justify-center">
-      <div className="panel max-w-md rounded-lg p-8 text-center">
-        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-lg border border-red-400/30 bg-red-400/10">
-          <ShieldAlert className="h-7 w-7 text-red-200" />
-        </div>
-        <p className="text-sm font-semibold uppercase text-red-200">403</p>
-        <h1 className="mt-2 text-2xl font-semibold text-white">Access Denied</h1>
-        <p className="mt-3 text-sm text-slate-400">You do not have permission to access this module.</p>
-        <Link className="mt-6 inline-flex items-center justify-center rounded-md bg-cyanline px-4 py-2 text-sm font-semibold text-ink transition hover:bg-[#73cad9]" to="/dashboard">
-          Return to dashboard
-        </Link>
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+      <div className="max-w-md text-center">
+        <ShieldAlert className="mx-auto h-8 w-8 text-amber-600" aria-hidden />
+        <h1 className="mt-3 text-lg font-semibold text-slate-900">You do not have access to this page</h1>
+        <p className="mt-1 text-sm text-slate-500">Your role does not include this function. Ask an administrator if you need access.</p>
+        <LinkButton to="/dashboard" className="mt-6">Back to dashboard</LinkButton>
       </div>
+    </div>
+  );
+}
+
+export function NotFoundPage() {
+  return (
+    <div className="mx-auto max-w-md py-16 text-center">
+      <SearchX className="mx-auto h-8 w-8 text-slate-400" aria-hidden />
+      <h1 className="mt-3 text-lg font-semibold text-slate-900">Page not found</h1>
+      <p className="mt-1 text-sm text-slate-500">The address may be mistyped, or the page has moved.</p>
+      <LinkButton to="/dashboard" variant="secondary" className="mt-6">Back to dashboard</LinkButton>
     </div>
   );
 }

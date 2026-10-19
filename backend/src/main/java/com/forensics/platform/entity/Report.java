@@ -64,6 +64,20 @@ public class Report {
 
     private String riskLevel;
 
+    /*
+     * Exact JSON data snapshot the report was generated from, and its SHA-256.
+     * Exports are rendered from this snapshot so they are reproducible.
+     * Null for reports created before snapshots existed.
+     */
+    @Column(name = "snapshot_json", columnDefinition = "text")
+    private String snapshotJson;
+
+    @Column(name = "content_sha256", length = 64)
+    private String contentSha256;
+
+    @Column(name = "reviewed_at")
+    private Instant reviewedAt;
+
     private Instant createdAt = Instant.now();
 
     private Instant updatedAt = Instant.now();

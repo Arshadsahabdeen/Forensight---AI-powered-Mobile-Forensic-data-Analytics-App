@@ -1,93 +1,91 @@
 package com.forensics.platform.ufdr;
 
+import com.forensics.platform.entity.AcquisitionMethod;
 import com.forensics.platform.entity.Device;
+import com.forensics.platform.entity.DeviceStatus;
+import com.forensics.platform.entity.EvidenceSourceFile;
+import com.forensics.platform.entity.InvestigationCase;
 import com.forensics.platform.repository.DeviceRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
+import java.util.Objects;
 
+/**
+ * Decides which device an imported evidence file belongs to.
+ * <ol>
+ *   <li>A device chosen at upload time is always used.</li>
+ *   <li>Otherwise a device in the same case with the same IMEI is reused.</li>
+ *   <li>Otherwise a new device is registered in the case from the file's device metadata
+ *       (the same handset may also be registered in other cases; IMEI is unique per case).</li>
+ * </ol>
+ * Devices are never moved between cases, and existing device details are never overwritten.
+ */
 @Service
-@RequiredArgsConstructor
 public class UFDRImportService {
 
     private final DeviceRepository deviceRepository;
 
-    public Device importDevice(Map<String, Object> data) {
-
-    Map<String, Object> deviceData =
-            (Map<String, Object>) data.get("device");
-
-    if (deviceData == null || deviceData.isEmpty()) {
-        throw new IllegalArgumentException(
-                "No device information found in UFDR file"
-        );
+    public UFDRImportService(DeviceRepository deviceRepository) {
+        this.deviceRepository = deviceRepository;
     }
 
-    String manufacturer =
-            stringValue(deviceData.get("manufacturer"));
+    public record Resolution(Device device, boolean created) {}
 
-    String brand =
-            stringValue(deviceData.get("brand"));
-
-    String model =
-            stringValue(deviceData.get("model"));
-
-    String imei =
-            stringValue(deviceData.get("imei"));
-
-    String operatingSystem =
-            stringValue(deviceData.get("operatingSystem"));
-
-    /*
-     * If this device already exists, reuse it.
-     */
-    if (imei != null && !imei.isBlank()) {
-
-        var existing =
-                deviceRepository.findByImei(imei);
-
-        if (existing.isPresent()) {
-            return existing.get();
+    public static class DeviceConflictException extends RuntimeException {
+        public DeviceConflictException(String message) {
+            super(message);
         }
     }
 
-    Device device = new Device();
-
-    device.setManufacturer(manufacturer);
-    device.setBrand(brand);
-    device.setModel(model);
-    device.setImei(imei);
-
-    device.setDeviceName(
-            buildDeviceName(brand, model)
-    );
-
-    device.setOperatingSystem(
-            operatingSystem == null ||
-            operatingSystem.isBlank()
-                    ? "Unknown"
-                    : operatingSystem
-    );
-
-    return deviceRepository.save(device);
-}
-
-    private String stringValue(Object value) {
-        if (value == null) {
-            return "";
+    public Resolution resolve(EvidenceSourceFile file, EvidenceExtractor.DeviceInfo info, String actor) {
+        InvestigationCase investigationCase = file.getInvestigationCase();
+        if (file.getDevice() != null) {
+            if (!Objects.equals(file.getDevice().getInvestigationCase().getId(), investigationCase.getId())) {
+                throw new DeviceConflictException("The selected device belongs to a different case.");
+            }
+            return new Resolution(file.getDevice(), false);
         }
 
-        return value.toString().trim();
+        String imei = blankToNull(info.imei());
+        if (imei != null) {
+            var existing = deviceRepository.findByInvestigationCaseIdAndImei(investigationCase.getId(), imei);
+            if (existing.isPresent()) {
+                return new Resolution(existing.get(), false);
+            }
+        }
+
+        Device device = new Device();
+        device.setInvestigationCase(investigationCase);
+        device.setManufacturer(blankToNull(info.manufacturer()));
+        device.setBrand(blankToNull(info.brand()));
+        device.setModel(blankToNull(info.model()));
+        device.setImei(imei);
+        device.setSerialNumber(blankToNull(info.serialNumber()));
+        device.setOperatingSystem(info.operatingSystem() == null || info.operatingSystem().isBlank() ? "Unknown" : info.operatingSystem().trim());
+        device.setOsVersion(blankToNull(info.osVersion()));
+        device.setDeviceName(buildDeviceName(info, file.getOriginalFileName()));
+        device.setAcquisitionMethod(file.getSourceFormat() == EvidenceSourceFile.SourceFormat.UFDR
+                ? AcquisitionMethod.IMPORTED_UFDR : AcquisitionMethod.OTHER);
+        device.setAcquisitionStatus(DeviceStatus.EXTRACTION_COMPLETED);
+        device.setCreatedBy(actor);
+        device.setUpdatedBy(actor);
+        device.setNotes("Registered automatically from evidence file '" + file.getOriginalFileName() + "' (SHA-256 " + file.getSha256() + ").");
+        return new Resolution(deviceRepository.save(device), true);
     }
 
-    private String buildDeviceName(String brand, String model) {
+    private static String buildDeviceName(EvidenceExtractor.DeviceInfo info, String fileName) {
+        String name = ((info.brand() == null ? "" : info.brand().trim()) + " " + (info.model() == null ? "" : info.model().trim())).trim();
+        if (!name.isBlank()) {
+            return truncate(name, 160);
+        }
+        return truncate("Imported device (" + fileName + ")", 160);
+    }
 
-        String name = ((brand == null ? "" : brand) + " " +
-                (model == null ? "" : model)).trim();
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
 
-        return name.isBlank()
-                ? "Imported Device"
-                : name;
+    private static String truncate(String value, int max) {
+        return value.length() > max ? value.substring(0, max) : value;
     }
 }
