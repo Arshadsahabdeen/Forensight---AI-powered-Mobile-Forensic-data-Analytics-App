@@ -20,6 +20,26 @@ Forensight ingests mobile extraction files, preserves the originals with SHA-256
 | **Reports** | Built from a stored JSON snapshot plus its SHA-256, so they can be reproduced and checked for alteration. Sections cover case details, devices, evidence sources with hashes, an overview, findings (with AI content marked), key events, methodology, data-driven limitations and the audit trail. PDF export is rendered from the snapshot. |
 | **Security** | JWT access tokens and rotating refresh tokens. Server-side role and case-assignment checks on every endpoint. Idle-session timeout is enforced by both browser and server. Maintenance mode is enforced. Accounts are disabled rather than deleted. Cases or devices holding evidence cannot be deleted. Errors never expose stack traces, SQL, tokens or evidence content. |
 
+## Roles
+
+Access is checked on the server for every request. A user can only reach a case's devices, evidence, timeline, relationships, assistant, workspace and reports if they can see the case itself.
+
+| Role | Access |
+|---|---|
+| **Admin** | View and edit every case; manage users, platform settings and maintenance mode; view the audit log and verify its hash chain. |
+| **Investigator** | Create cases and devices; view and edit only the cases they lead; upload evidence, run imports and write notes and findings; draft reports. |
+| **Reviewer** | View every case read-only; review findings and reports written by others. |
+
+## Typical workflow
+
+1. **Create a case** and register the seized devices.
+2. **Upload extraction files** (`.xml`, `.ufdr`, `.zip`) in the case's *Files & integrity* tab. Hashes are recorded at upload.
+3. **Watch the import** on the *Processing* page. Failed jobs can be retried.
+4. **Explore** the records using evidence search, the timeline, the relationship explorer and the evidence assistant.
+5. **Curate**: bookmark records, add notes and record findings with their supporting evidence.
+6. **Review**: a reviewer accepts or rejects each finding.
+7. **Report**: generate a snapshot report, check its hash and export the PDF.
+
 ## Architecture
 
 ```
@@ -31,7 +51,30 @@ frontend (React 19, Vite, TypeScript, Tailwind)  ──/api──▶  backend (S
 * Backend packages: `controller`, `service` (case access, ingestion, correlation, timeline, workspace, reports, assistant, audit), `ufdr` (secure parsing and extraction), `entity` and `repository` (JPA), with Flyway migrations `V1`–`V11`.
 * AI service: `/health`, `/v1/config`, `/v1/assist`, with an extractive engine, an optional Claude engine (`claude-opus-5-5` by default, structured JSON output, refusal fallback) and grounding validation.
 
-See [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md) for endpoints and [datasets/samples/README.md](datasets/samples/README.md) for the supported XML schema and synthetic sample files.
+* Frontend: feature folders under `src/features` (cases, devices, evidence, files, processing, timeline, relationships, assistant, workspace, reports, audit, users, settings), a shared UI kit in `src/components/ui`, and routes split per page.
+
+### Project structure
+
+```
+.
+├── backend/            Spring Boot API (src/main/java/com/forensics/platform, Flyway migrations in src/main/resources/db/migration)
+├── ai-service/         FastAPI evidence assistant (app/services: extractive, llm, grounding)
+├── frontend/           React + Vite single-page app, served by Nginx in Docker
+├── datasets/samples/   Synthetic extraction files and the supported XML schema
+├── docs/               API, architecture, installation and development notes
+├── docker-compose.yml
+└── .env.example        Every configurable setting with safe local defaults
+```
+
+## Documentation
+
+| Document | Contents |
+|---|---|
+| [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md) | REST endpoints |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design |
+| [docs/INSTALLATION.md](docs/INSTALLATION.md) | Installation steps |
+| [docs/DEVELOPMENT_GUIDELINES.md](docs/DEVELOPMENT_GUIDELINES.md) | Coding conventions |
+| [datasets/samples/README.md](datasets/samples/README.md) | Supported XML schema and the sample files |
 
 ## Run with Docker
 
@@ -47,6 +90,20 @@ docker compose up --build
 | AI service | http://localhost:8000/health |
 
 Original evidence files persist in the `evidence-data` volume and the database in `postgres-data`. Back up both together.
+
+### Configuration
+
+All settings are environment variables. [.env.example](.env.example) lists them all. These are the main ones:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `JWT_SECRET` | development value | Token signing key. **Change it** for anything beyond local use (at least 64 characters). |
+| `POSTGRES_PASSWORD` | `forensics` | Database password |
+| `SEED_DEVELOPMENT_USERS` / `SEED_DEMO_CASES` | `true` | Create development accounts and demo cases. Set both to `false` outside development. |
+| `UPLOAD_MAX_BYTES` | `104857600` (100 MB) | Maximum evidence upload size |
+| `PROCESSING_WORKERS` | `2` | Number of parallel import jobs |
+| `AI_MAX_RECORDS` | `150` | Maximum records the backend sends to the AI service per request |
+| `ANTHROPIC_API_KEY`, `AI_ALLOW_EXTERNAL_PROCESSING`, `AI_MODEL` | unset, `false`, `claude-opus-5-5` | Generative AI (opt-in, see below) |
 
 ## Local development
 
@@ -83,6 +140,8 @@ AI_MODEL=claude-opus-5-5         # optional
 Without both, the local extractive engine is used and the UI says so.
 
 ## Tests
+
+There are 56 backend tests, 8 AI-service tests and 22 frontend tests.
 
 ```bash
 cd backend && mvn test           # unit, MockMvc + H2 integration, and PostgreSQL 16 (embedded) migration tests
